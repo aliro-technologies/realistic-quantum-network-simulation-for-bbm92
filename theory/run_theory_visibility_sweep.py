@@ -77,5 +77,5 @@ if __name__ == "__main__":
     simulation_results["x_parameter_label"] = "Visibility"
 
     # Save dict with parameters and sim results to JSON file
-    with open(file_path + "_sim_results" + ".json", "w") as file:
+    with open(file_path + "_theory_results" + ".json", "w") as file:
         file.write(json.dumps(simulation_results, indent=2))
