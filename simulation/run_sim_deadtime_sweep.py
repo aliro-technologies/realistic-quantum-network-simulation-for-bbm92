@@ -11,21 +11,28 @@ import numpy as np
 import copy
 from datetime import datetime
 import json
+import os
 
-import aqnsim
-from aqnsim import SECOND, TERAHERTZ, SPEED_OF_LIGHT, NANOSECOND, DEFAULT_REFRACTIVE_INDEX
+from aqnsim import (
+    SECOND,
+    SPEED_OF_LIGHT,
+    NANOSECOND,
+    DEFAULT_REFRACTIVE_INDEX,
+)
 
 # Simulation parameters
 CHANNEL_LENGTH = 1  # in meters
-CHANNEL_DELAY = CHANNEL_LENGTH * DEFAULT_REFRACTIVE_INDEX / SPEED_OF_LIGHT  # latency for quantum and classical links
-LINK_LOSS_IN_DB_A = 12 # Loss per link for Alice, in dB
-LINK_LOSS_IN_DB_B = 12 # Loss per link for Bob, in dB
+CHANNEL_DELAY = (
+    CHANNEL_LENGTH * DEFAULT_REFRACTIVE_INDEX / SPEED_OF_LIGHT
+)  # latency for quantum and classical links
+LINK_LOSS_IN_DB_A = 12  # Loss per link for Alice, in dB
+LINK_LOSS_IN_DB_B = 12  # Loss per link for Bob, in dB
 
 # Source parameters
 SOURCE_PAIR_RATE = 1.5e6 / SECOND  # Approx pairs per second from source
 SOURCE_VISIBILITY = 0.94  # Visibility of the entangled source
-SOURCE_WAVELENGTH = 810 * 10**-9 # Wavelength of source photons, in meters
-SOURCE_BANDWIDTH_FWHM = 3 * 10**-9 # Source bandwidth FWHM, in meters
+SOURCE_WAVELENGTH = 810 * 10**-9  # Wavelength of source photons, in meters
+SOURCE_BANDWIDTH_FWHM = 3 * 10**-9  # Source bandwidth FWHM, in meters
 
 DARK_COUNT_RATES = {
     0: 50,
@@ -37,22 +44,23 @@ DARK_COUNT_RATES = {
     6: 650,
     7: 650,
 }  # Average dark counts per second for each of the 8 detectors
-DETECTOR_JITTER = 0.690e-9 * SECOND # Time resolution of detectors (Jitter extracted from plots)
+DETECTOR_JITTER = (
+    0.690e-9 * SECOND
+)  # Time resolution of detectors (Jitter extracted from plots)
 
 DETECTOR_FREQ_WIDTH = SPEED_OF_LIGHT / 700e-9 - SPEED_OF_LIGHT / 900e-9
 DETECTOR_MAXIMUM_EFFICIENCY = 0.60
-MINIMUM_TIME_RESOLUTION = 2 * NANOSECOND # Time resolution of the FPGA 
+MINIMUM_TIME_RESOLUTION = 2 * NANOSECOND  # Time resolution of the FPGA
 
 RANDOM_SEED = 0
 
 if __name__ == "__main__":
-
     # Create folder and file name
     # Set up directory to save results
     main_folder_name = "simulation_results/"
     if not os.path.isdir(main_folder_name):
         os.mkdir(main_folder_name)
-    dir_path = main_folder_path + datetime.utcnow().strftime("%Y-%m-%d")
+    dir_path = main_folder_name + datetime.utcnow().strftime("%Y-%m-%d")
     if not os.path.isdir(dir_path):
         os.mkdir(dir_path)
     # Get file name based on uuid and time
@@ -69,7 +77,6 @@ if __name__ == "__main__":
     qber_errors = []
 
     for dead_time in dead_times:
-
         # Make dict with parameters
         simulation_parameters = {
             "channel_length": CHANNEL_LENGTH,
@@ -89,7 +96,14 @@ if __name__ == "__main__":
             "num_shots": 3000000,
             "random_seed": RANDOM_SEED,
         }
-        secure_key_rate, secure_key_rate_error, raw_key_rate, raw_key_rate_error, qber, qber_error = run_key_gen(**simulation_parameters)
+        (
+            secure_key_rate,
+            secure_key_rate_error,
+            raw_key_rate,
+            raw_key_rate_error,
+            qber,
+            qber_error,
+        ) = run_key_gen(**simulation_parameters)
         print(f"raw_key_rate: {raw_key_rate} bps")
         print(f"secure_key_rate: {secure_key_rate} bps")
 

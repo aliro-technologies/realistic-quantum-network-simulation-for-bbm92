@@ -18,42 +18,42 @@ the two sifted keys will be logged and the QBER and sifted key rates will also b
 """
 
 from enum import Enum, auto
-from functools import partial
-from typing import List
 import time
 import math
 
-import random
 import numpy as np
 from aqnsim.run_simulations import SimulationContext
 from aqnsim import random_utilities
 
 import aqnsim
-from aqnsim import SECOND, TERAHERTZ, SPEED_OF_LIGHT, NANOSECOND, DEFAULT_REFRACTIVE_INDEX
+from aqnsim import (
+    SPEED_OF_LIGHT,
+)
 from get_secure_key_rate_error import get_secure_key_rate_error
 
-from prometheus_client import Gauge, Counter
 
 BASIS_CHOICE_KEY = "basis_choice"  # key indexing choice of basis in classical messages
 MEASUREMENTS_COMPLETE_SIGNAL_NAME = "measurements_complete"
 CLASSICAL_MSG_RECEIVED_SIGNAL_NAME = "classical_message_received"
+
 
 # possible basis choices used by the receiving nodes
 class BasisChoices(Enum):
     HV_BASIS = 0  # Z-basis, Horizontal/Vertical
     DA_BASIS = auto()  # X-basis, Diagonal/Anti-diagonal
 
+
 STATE_FORMALISM = aqnsim.StateFormalisms.DENSITY_MATRIX
 
 DETECTOR_NAME_LOOKUP = {
-'Alice_detector_0_0': [0, BasisChoices.HV_BASIS, 0],
-'Alice_detector_0_1': [0, BasisChoices.HV_BASIS, 1],
-'Bob_detector_0_1': [1, BasisChoices.HV_BASIS, 1],
-'Bob_detector_0_0': [1, BasisChoices.HV_BASIS, 0],
-'Alice_detector_1_0': [0, BasisChoices.DA_BASIS, 0],
-'Bob_detector_1_0': [1, BasisChoices.DA_BASIS, 0],
-'Bob_detector_1_1': [1, BasisChoices.DA_BASIS, 1],
-'Alice_detector_1_1': [0, BasisChoices.DA_BASIS, 1]
+    "Alice_detector_0_0": [0, BasisChoices.HV_BASIS, 0],
+    "Alice_detector_0_1": [0, BasisChoices.HV_BASIS, 1],
+    "Bob_detector_0_1": [1, BasisChoices.HV_BASIS, 1],
+    "Bob_detector_0_0": [1, BasisChoices.HV_BASIS, 0],
+    "Alice_detector_1_0": [0, BasisChoices.DA_BASIS, 0],
+    "Bob_detector_1_0": [1, BasisChoices.DA_BASIS, 0],
+    "Bob_detector_1_1": [1, BasisChoices.DA_BASIS, 1],
+    "Alice_detector_1_1": [0, BasisChoices.DA_BASIS, 1],
 }
 
 
@@ -61,6 +61,7 @@ DETECTOR_NAME_LOOKUP = {
 SendProtocol: used by Phoebe (sending node) to send entangled photon pairs with one photon sent to
 each receiving node
 """
+
 
 class SendProtocol(aqnsim.NodeProtocol):
     """
@@ -88,7 +89,7 @@ class SendProtocol(aqnsim.NodeProtocol):
         dark_count_rates: dict,
         name: str = None,
         qmemory_name: str = None,
-        ):
+    ):
         super().__init__(sim_context=sim_context, name=name)
         self.qs = sim_context.qs
         self.source_pair_rate = source_pair_rate
@@ -97,7 +98,10 @@ class SendProtocol(aqnsim.NodeProtocol):
         self.dead_time = detector_dead_time
         self.detection_jitter = detector_jitter
         self.source_delay_model = aqnsim.ExponentialDelayModel(lam=source_pair_rate)
-        self.dark_count_delay_model = {i: aqnsim.ExponentialDelayModel(lam=dark_count_rates[i]) for i in range(0, 8)}
+        self.dark_count_delay_model = {
+            i: aqnsim.ExponentialDelayModel(lam=dark_count_rates[i])
+            for i in range(0, 8)
+        }
 
         # For deferred measurement functionality, measurements local to Alice or Bob must be tracked here
         # and communicated at the end to Alice and Bob.
@@ -114,10 +118,12 @@ class SendProtocol(aqnsim.NodeProtocol):
             sender=self.name,
             action="MEASUREMENTS_COMPLETE",
             status=aqnsim.StatusMessages.SUCCESS,
-            content={"alice_measurements": self.alice_measurements,
-                     "bob_measurements": self.bob_measurements,
-                     "alice_basis_choices": self.alice_basis_choices,
-                     "bob_basis_choices": self.bob_basis_choices}
+            content={
+                "alice_measurements": self.alice_measurements,
+                "bob_measurements": self.bob_measurements,
+                "alice_basis_choices": self.alice_basis_choices,
+                "bob_basis_choices": self.bob_basis_choices,
+            },
         )
         self.parent_component.ports["classical_channel_port"].rx_output(msg)
 
@@ -151,7 +157,9 @@ class SendProtocol(aqnsim.NodeProtocol):
                 for detector_index, result in enumerate(detector_outcomes):
                     if result == 1:
                         # Sqrt(2) comes from the convolution of two Gaussians for two detector resolutions
-                        jitter = random_utilities.normal(loc=0, scale=self.detection_jitter/np.sqrt(2))
+                        jitter = random_utilities.normal(
+                            loc=0, scale=self.detection_jitter / np.sqrt(2)
+                        )
                         timestamp = temporal_offset + jitter + times[detector_index]
                         source_detection_times[timestamp] = detector_index
                 prev_temporal_offset = temporal_offset
@@ -161,19 +169,25 @@ class SendProtocol(aqnsim.NodeProtocol):
             for detector_index in range(0, 8):
                 prev_temporal_offset = 0
                 temporal_offset = 0
-                total_time = 1/self.source_pair_rate * self.num_shots
+                total_time = 1 / self.source_pair_rate * self.num_shots
                 while temporal_offset < total_time:
                     temporal_offset = (
-                        self.dark_count_delay_model[detector_index].get_delay() + prev_temporal_offset
+                        self.dark_count_delay_model[detector_index].get_delay()
+                        + prev_temporal_offset
                     )
                     # Sqrt(2) comes from the convolution of two Gaussians for two detector resolutions
-                    jitter = random_utilities.normal(loc=0, scale=self.detection_jitter/np.sqrt(2))
+                    jitter = random_utilities.normal(
+                        loc=0, scale=self.detection_jitter / np.sqrt(2)
+                    )
                     timestamp = temporal_offset + jitter
                     dark_count_detection_times[timestamp] = detector_index
                     prev_temporal_offset = temporal_offset
 
             # Create a sorted list of all timestamps
-            all_timestamps = sorted(list(source_detection_times.keys()) + list(dark_count_detection_times.keys()))
+            all_timestamps = sorted(
+                list(source_detection_times.keys())
+                + list(dark_count_detection_times.keys())
+            )
 
             # Track the last detection to manually implement dead times,
             # as we are using deferred measurements.
@@ -182,7 +196,11 @@ class SendProtocol(aqnsim.NodeProtocol):
             for timestamp in all_timestamps:
                 source_detector = source_detection_times.get(timestamp)
                 dark_count_detector = dark_count_detection_times.get(timestamp)
-                detector_index = source_detector if source_detector is not None else dark_count_detector
+                detector_index = (
+                    source_detector
+                    if source_detector is not None
+                    else dark_count_detector
+                )
 
                 detector_name = detector_names[detector_index]
                 [is_bob, basis, detector] = DETECTOR_NAME_LOOKUP[detector_name]
@@ -218,9 +236,14 @@ class ReceiveProtocol(aqnsim.NodeProtocol):
     :param qmemory_name: The name of the memory used in this protocol.
     """
 
-    def __init__(self, sim_context: SimulationContext,
-                 detector_jitter: float, minimum_time_resolution: float, 
-                 name: str = None, qmemory_name: str = None):
+    def __init__(
+        self,
+        sim_context: SimulationContext,
+        detector_jitter: float,
+        minimum_time_resolution: float,
+        name: str = None,
+        qmemory_name: str = None,
+    ):
         super().__init__(sim_context=sim_context, name=name)
 
         # track the quantum simulator instance
@@ -243,10 +266,11 @@ class ReceiveProtocol(aqnsim.NodeProtocol):
 
     def initialize(self, parent_component=None):
         super().initialize(parent_component)
-        
-        # set up classical channel input handler
-        self.parent_component.ports["classical_channel_port"].add_rx_input_handler(handler=self.input_handler_classical)
 
+        # set up classical channel input handler
+        self.parent_component.ports["classical_channel_port"].add_rx_input_handler(
+            handler=self.input_handler_classical
+        )
 
     def input_handler_classical(self, msg: aqnsim.CMessage):
         """Handler for messages communicated over the classical channel"""
@@ -258,10 +282,18 @@ class ReceiveProtocol(aqnsim.NodeProtocol):
         if classical_msg_action == "MEASUREMENTS_COMPLETE":
             # Stop processing new photodetector counts
             node_name = self.parent_component.name
-            self.parent_component.subcomponents[f"{node_name}_detector_0_0"].ports["cout0"].rx_output_handlers = []
-            self.parent_component.subcomponents[f"{node_name}_detector_0_1"].ports["cout0"].rx_output_handlers = []
-            self.parent_component.subcomponents[f"{node_name}_detector_1_0"].ports["cout0"].rx_output_handlers = []
-            self.parent_component.subcomponents[f"{node_name}_detector_1_1"].ports["cout0"].rx_output_handlers = []
+            self.parent_component.subcomponents[f"{node_name}_detector_0_0"].ports[
+                "cout0"
+            ].rx_output_handlers = []
+            self.parent_component.subcomponents[f"{node_name}_detector_0_1"].ports[
+                "cout0"
+            ].rx_output_handlers = []
+            self.parent_component.subcomponents[f"{node_name}_detector_1_0"].ports[
+                "cout0"
+            ].rx_output_handlers = []
+            self.parent_component.subcomponents[f"{node_name}_detector_1_1"].ports[
+                "cout0"
+            ].rx_output_handlers = []
 
             # Save basises and measurements
             if self.parent_component.name == "Bob":
@@ -277,7 +309,9 @@ class ReceiveProtocol(aqnsim.NodeProtocol):
             self.classical_msg = msg.content["basis_choices"]
             self.send_signal(CLASSICAL_MSG_RECEIVED_SIGNAL_NAME)
         else:
-            raise ValueError(f"Unexpected message action {classical_msg_action} received.")
+            raise ValueError(
+                f"Unexpected message action {classical_msg_action} received."
+            )
 
     def _process_classical_message(self, node_name):
         """Method for processing classical messages from the peer node"""
@@ -303,13 +337,20 @@ class ReceiveProtocol(aqnsim.NodeProtocol):
                 timestamp_difference = local_time - remote_time
 
                 # Divide resolution by 2 because we take abs of the timestamp_difference
-                if abs(timestamp_difference) < self.minimum_time_resolution/2:
-                    if basis_choices[local_time] == remote_basis_choices[remote_timestamps[p2]]:
+                if abs(timestamp_difference) < self.minimum_time_resolution / 2:
+                    if (
+                        basis_choices[local_time]
+                        == remote_basis_choices[remote_timestamps[p2]]
+                    ):
                         last_coinc_diff_local = local_time - last_local_coinc_time
                         last_coinc_diff_remote = remote_time - last_remote_coinc_time
 
                         # Don't collect multiple coincidences within the same coincidence window
-                        if abs(last_coinc_diff_local) > self.minimum_time_resolution and abs(last_coinc_diff_remote) > self.minimum_time_resolution:
+                        if (
+                            abs(last_coinc_diff_local) > self.minimum_time_resolution
+                            and abs(last_coinc_diff_remote)
+                            > self.minimum_time_resolution
+                        ):
                             common_basis_choice_times.append(local_time)
                             last_local_coinc_time = local_time
                             last_remote_coinc_time = remote_time
@@ -320,7 +361,10 @@ class ReceiveProtocol(aqnsim.NodeProtocol):
                 else:
                     p2 += 1
 
-            self.sifted_key = [measurements[common_basis_choice_times[k]] for k in range(len(common_basis_choice_times))]
+            self.sifted_key = [
+                measurements[common_basis_choice_times[k]]
+                for k in range(len(common_basis_choice_times))
+            ]
 
     def _send_basis_choices(self, node_name):
         """
@@ -384,7 +428,7 @@ def setup_network(
     detector_maximum_efficiency: float,
     minimum_time_resolution: float,
     num_shots: int,
-    ):
+):
     """
     Set up the network for the BBM92 protocol.
 
@@ -407,18 +451,25 @@ def setup_network(
     :param num_shots: The number of shots to simulate per analytic sampling.
     """
     # Instantiate nodes and network that contains them
-    alice = aqnsim.Node(sim_context=sim_context, name="Alice")  # receives one side of entangled photon pair
-    bob = aqnsim.Node(sim_context=sim_context, name="Bob")  # receives other side of entangled photon pair
-    phoebe = aqnsim.Node(sim_context=sim_context, name="Phoebe")  # produces entangled photon pairs
+    alice = aqnsim.Node(
+        sim_context=sim_context, name="Alice"
+    )  # receives one side of entangled photon pair
+    bob = aqnsim.Node(
+        sim_context=sim_context, name="Bob"
+    )  # receives other side of entangled photon pair
+    phoebe = aqnsim.Node(
+        sim_context=sim_context, name="Phoebe"
+    )  # produces entangled photon pairs
     network = aqnsim.Network(sim_context=sim_context, nodes=[alice, bob, phoebe])
 
-    _setup_source_node(sim_context=sim_context,
-                       node=phoebe,
-                       source_pair_rate=source_pair_rate,
-                       source_visibility=source_visibility,
-                       source_wavelength=source_wavelength,
-                       source_bandwidth_fwhm_wavelength=source_bandwidth_fwhm_wavelength
-                       )
+    _setup_source_node(
+        sim_context=sim_context,
+        node=phoebe,
+        source_pair_rate=source_pair_rate,
+        source_visibility=source_visibility,
+        source_wavelength=source_wavelength,
+        source_bandwidth_fwhm_wavelength=source_bandwidth_fwhm_wavelength,
+    )
 
     # set up receiving nodes--Alice and Bob each receive one side of an entangled photon pair
     receiving_nodes = [alice, bob]
@@ -429,17 +480,31 @@ def setup_network(
             source_wavelength=source_wavelength,
             detector_dead_time=detector_dead_time,
             detector_maximum_efficiency=detector_maximum_efficiency,
-            detector_freq_width=detector_freq_width
-            )
+            detector_freq_width=detector_freq_width,
+        )
 
     # create fiber links for distributing entangled photons
-    fiber_link_alice = aqnsim.FiberLink(sim_context=sim_context, length=channel_length, insertion_losses={"port1": link_loss_in_db_a})
-    fiber_link_bob = aqnsim.FiberLink(sim_context=sim_context, length=channel_length, insertion_losses={"port1": link_loss_in_db_b})
+    fiber_link_alice = aqnsim.FiberLink(
+        sim_context=sim_context,
+        length=channel_length,
+        insertion_losses={"port1": link_loss_in_db_a},
+    )
+    fiber_link_bob = aqnsim.FiberLink(
+        sim_context=sim_context,
+        length=channel_length,
+        insertion_losses={"port1": link_loss_in_db_b},
+    )
 
     # create classical links for coordination with source
-    classical_link_phoebe_alice = aqnsim.ClassicalLink(sim_context=sim_context, delay=channel_delay, name="classical_link_phoebe_alice")
-    classical_link_phoebe_bob = aqnsim.ClassicalLink(sim_context=sim_context, delay=channel_delay, name="classical_link_phoebe_bob")
-    classical_link_bob_alice = aqnsim.ClassicalLink(sim_context=sim_context, delay=channel_delay, name="classical_link_bob_alice")
+    classical_link_phoebe_alice = aqnsim.ClassicalLink(
+        sim_context=sim_context, delay=channel_delay, name="classical_link_phoebe_alice"
+    )
+    classical_link_phoebe_bob = aqnsim.ClassicalLink(
+        sim_context=sim_context, delay=channel_delay, name="classical_link_phoebe_bob"
+    )
+    classical_link_bob_alice = aqnsim.ClassicalLink(
+        sim_context=sim_context, delay=channel_delay, name="classical_link_bob_alice"
+    )
 
     # connect network links
     network.add_link(
@@ -511,8 +576,8 @@ def _setup_source_node(
     source_pair_rate: float,
     source_visibility: float,
     source_wavelength: float,
-    source_bandwidth_fwhm_wavelength: float
-    ):
+    source_bandwidth_fwhm_wavelength: float,
+):
     """
     Set up a node that emits Werner states encoded in polarization.
 
@@ -535,29 +600,49 @@ def _setup_source_node(
     source_est_qber = (1 - source_visibility) / 2  # Estimated QBER
     if STATE_FORMALISM == aqnsim.StateFormalisms.DENSITY_MATRIX:
         # Fidelity is 1 - (qber_x + qber_y + qber_z)/2 for a Bell state
-        state_distribution = [(1, aqnsim.get_noisy_werner(state="phi_plus", fidelity=1 - source_est_qber*3/2))]
+        state_distribution = [
+            (
+                1,
+                aqnsim.get_noisy_werner(
+                    state="phi_plus", fidelity=1 - source_est_qber * 3 / 2
+                ),
+            )
+        ]
     else:
-        sim_context.simlogger.warning(f"Werner state not implemented for state vector formalism.")
+        sim_context.simlogger.warning(
+            "Werner state not implemented for state vector formalism."
+        )
         state_distribution = [(1, aqnsim.BELL_STATES["phi_plus"])]
 
     state_model = aqnsim.StateModel(
         state_distribution=state_distribution, formalism=STATE_FORMALISM
     )
 
-    source_bandwidth_st_dev = source_bandwidth_fwhm_wavelength / (2 * np.sqrt(2 * np.log(2)))
+    source_bandwidth_st_dev = source_bandwidth_fwhm_wavelength / (
+        2 * np.sqrt(2 * np.log(2))
+    )
     source_freq = SPEED_OF_LIGHT / source_wavelength
-    source_freq_width = SPEED_OF_LIGHT * source_bandwidth_st_dev / (source_wavelength**2)
+    source_freq_width = (
+        SPEED_OF_LIGHT * source_bandwidth_st_dev / (source_wavelength**2)
+    )
 
     entangled_photon_source = aqnsim.EntangledPolarizationSource(
         sim_context=sim_context,
         state_model=state_model,
         name="entangled_photon_source",
-        mode_shape=aqnsim.GaussianModeShape(frequency=source_freq, frequency_width=source_freq_width),
+        mode_shape=aqnsim.GaussianModeShape(
+            frequency=source_freq, frequency_width=source_freq_width
+        ),
         clock=None,
     )
-    entangled_photon_source.ports["qout0"].forward_output_to_output(node.ports["entangled_photon_output_0_port"])
-    entangled_photon_source.ports["qout1"].forward_output_to_output(node.ports["entangled_photon_output_1_port"])
+    entangled_photon_source.ports["qout0"].forward_output_to_output(
+        node.ports["entangled_photon_output_0_port"]
+    )
+    entangled_photon_source.ports["qout1"].forward_output_to_output(
+        node.ports["entangled_photon_output_1_port"]
+    )
     node.add_subcomponent(entangled_photon_source)
+
 
 def _setup_receiving_node(
     sim_context: aqnsim.SimulationContext,
@@ -565,8 +650,8 @@ def _setup_receiving_node(
     source_wavelength: float,
     detector_dead_time: float,
     detector_maximum_efficiency: float,
-    detector_freq_width: float
-    ):
+    detector_freq_width: float,
+):
     """
     Set up receiving node.
 
@@ -586,11 +671,16 @@ def _setup_receiving_node(
     # use, one of which includes a half-wave plate in the path before the PBS
     bs = aqnsim.BeamSplitter(sim_context=sim_context, name="bs")
     node.add_subcomponent(bs)
-    node.ports["entangled_photon_input_port"].forward_input_to_input(bs.ports[aqnsim.BS_LEFT_INPUT_PORT_NAME])
+    node.ports["entangled_photon_input_port"].forward_input_to_input(
+        bs.ports[aqnsim.BS_LEFT_INPUT_PORT_NAME]
+    )
 
     # create a polarizing beamsplitter and two detectors for each output port
     # of the input beamsplitter
-    bs_outport_names = [aqnsim.BS_LEFT_OUTPUT_PORT_NAME, aqnsim.BS_RIGHT_OUTPUT_PORT_NAME]
+    bs_outport_names = [
+        aqnsim.BS_LEFT_OUTPUT_PORT_NAME,
+        aqnsim.BS_RIGHT_OUTPUT_PORT_NAME,
+    ]
     pbs_outport_names = [aqnsim.OUTPUT_PORT_0_NAME, aqnsim.OUTPUT_PORT_1_NAME]
 
     for n in range(2):
@@ -603,22 +693,29 @@ def _setup_receiving_node(
         # Bloch sphere, and phase phi = pi for the HWP will transform |H> to |+>
         # and |V> to |->, i.e. a Z to X basis transformation
         if n == 1:
-            hwp = aqnsim.HalfWavePlate(sim_context=sim_context, angle=np.pi / 8, name="hwp")
-            bs.ports[bs_outport_names[n]].forward_output_to_input(hwp.ports[aqnsim.INPUT_PORT_0_NAME])
-            hwp.ports[aqnsim.OUTPUT_PORT_0_NAME].forward_output_to_input(pbs.ports[aqnsim.INPUT_PORT_0_NAME])
+            hwp = aqnsim.HalfWavePlate(
+                sim_context=sim_context, angle=np.pi / 8, name="hwp"
+            )
+            bs.ports[bs_outport_names[n]].forward_output_to_input(
+                hwp.ports[aqnsim.INPUT_PORT_0_NAME]
+            )
+            hwp.ports[aqnsim.OUTPUT_PORT_0_NAME].forward_output_to_input(
+                pbs.ports[aqnsim.INPUT_PORT_0_NAME]
+            )
             node.add_subcomponent(hwp)
         else:
-            bs.ports[bs_outport_names[n]].forward_output_to_input(pbs.ports[aqnsim.INPUT_PORT_0_NAME])
+            bs.ports[bs_outport_names[n]].forward_output_to_input(
+                pbs.ports[aqnsim.INPUT_PORT_0_NAME]
+            )
 
         source_freq = SPEED_OF_LIGHT / source_wavelength
         detector_efficiency = {
             aqnsim.MAX_EFFICIENCY_KEY: detector_maximum_efficiency,
             aqnsim.FREQUENCY_PARAM_KEY: source_freq,
-            aqnsim.FREQUENCY_WIDTH_PARAM_KEY: detector_freq_width
+            aqnsim.FREQUENCY_WIDTH_PARAM_KEY: detector_freq_width,
         }  # Efficiency of detector
         # add photon detectors
         for k in range(2):
-
             detector = aqnsim.PhotonDetector(
                 sim_context=sim_context,
                 number_resolving=False,
@@ -629,8 +726,9 @@ def _setup_receiving_node(
             )
 
             node.add_subcomponent(detector)
-            pbs.ports[pbs_outport_names[k]].forward_output_to_input(detector.ports[aqnsim.PD_INPUT_PORT_NAME])
-                
+            pbs.ports[pbs_outport_names[k]].forward_output_to_input(
+                detector.ports[aqnsim.PD_INPUT_PORT_NAME]
+            )
 
 
 """
@@ -652,6 +750,7 @@ def compute_QBER(node0_key: list, node1_key: list):
         qber = 1 - (sum(1 if node0_key[i] == node1_key[i] else 0 for i in range(N)) / N)
     return qber
 
+
 def run_key_gen(
     channel_length: float,
     channel_delay: float,
@@ -669,7 +768,7 @@ def run_key_gen(
     minimum_time_resolution: float,
     num_shots: int,
     random_seed: int,
-    ):
+):
     """
     Runs the simulation to generate keys and simulate QBER.
 
@@ -697,8 +796,12 @@ def run_key_gen(
     start_time = time.time()
 
     # The simulation context
-    sim_context = aqnsim.SimulationContext(log_to_file=False, logging_level=0, defer_measurements=True)
-    sim_context.qs=aqnsim.QuantumSimulator(state_formalism=STATE_FORMALISM, defer_measurements=True) 
+    sim_context = aqnsim.SimulationContext(
+        log_to_file=False, logging_level=0, defer_measurements=True
+    )
+    sim_context.qs = aqnsim.QuantumSimulator(
+        state_formalism=STATE_FORMALISM, defer_measurements=True
+    )
 
     aqnsim.simlogger.info("creating simulation environment and quantum simulator")
 
@@ -735,7 +838,9 @@ def run_key_gen(
     receiving_node1_protocol = receiving_node1.protocols["ReceiveProtocol"]
 
     # Compute QBER
-    qber = compute_QBER(receiving_node0_protocol.sifted_key, receiving_node1_protocol.sifted_key)
+    qber = compute_QBER(
+        receiving_node0_protocol.sifted_key, receiving_node1_protocol.sifted_key
+    )
 
     # Estimate sifted key rate
     raw_sifted_key_size = len(receiving_node0_protocol.sifted_key)
@@ -743,7 +848,7 @@ def run_key_gen(
 
     if math.isnan(binary_entropy):
         secure_key_size = 0
-    else: 
+    else:
         secure_key_size = max(raw_sifted_key_size * (1 - 2.1 * binary_entropy), 0)
     total_secure_key_bits += secure_key_size
 
@@ -756,10 +861,12 @@ def run_key_gen(
     # Find errors:
     raw_key_rate_error = np.sqrt(raw_sifted_key_size) * source_pair_rate / num_shots
     # Find error as standard deviation of a binomial distribution divided by the square root of the number of measurements
-    qber_error = np.sqrt(qber * (1-qber)) / np.sqrt(raw_sifted_key_size)
+    qber_error = np.sqrt(qber * (1 - qber)) / np.sqrt(raw_sifted_key_size)
 
     # Find secure key rate error
-    secure_key_rate_error = get_secure_key_rate_error(raw_key_rate, raw_key_rate_error, qber, qber_error)
+    secure_key_rate_error = get_secure_key_rate_error(
+        raw_key_rate, raw_key_rate_error, qber, qber_error
+    )
 
     end_time = time.time()
 
@@ -770,4 +877,11 @@ def run_key_gen(
     print(f"QBER of keys: {qber}")
 
     # End loop and return key rate, QBER
-    return secure_key_rate, secure_key_rate_error, raw_key_rate, raw_key_rate_error, qber, qber_error
+    return (
+        secure_key_rate,
+        secure_key_rate_error,
+        raw_key_rate,
+        raw_key_rate_error,
+        qber,
+        qber_error,
+    )

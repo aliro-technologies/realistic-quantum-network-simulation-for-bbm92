@@ -12,9 +12,13 @@ import numpy as np
 import copy
 from datetime import datetime
 import json
+import os
 
-import aqnsim
-from aqnsim import SECOND, TERAHERTZ, SPEED_OF_LIGHT, NANOSECOND, DEFAULT_REFRACTIVE_INDEX
+from aqnsim import (
+    SECOND,
+    SPEED_OF_LIGHT,
+    DEFAULT_REFRACTIVE_INDEX,
+)
 
 """
 run: dbA, dbB, pair rate, qber, jitter, est. DCA, est. DCB
@@ -37,14 +41,14 @@ mar20,run6: 11.8, 11.9, 1.41e6, 0.03, 690, 19200, 14950
 # Simulation parameters
 CHANNEL_LENGTH = 1  # in meters
 CHANNEL_DELAY = CHANNEL_LENGTH * DEFAULT_REFRACTIVE_INDEX / SPEED_OF_LIGHT
-LINK_LOSS_IN_DB_A = 12 # Loss per link for Alice, in dB
-LINK_LOSS_IN_DB_B = 12 # Loss per link for Bob, in dB
+LINK_LOSS_IN_DB_A = 12  # Loss per link for Alice, in dB
+LINK_LOSS_IN_DB_B = 12  # Loss per link for Bob, in dB
 
 # Source parameters
 SOURCE_PAIR_RATE = 1.50e6 / SECOND  # Approx pairs per second from source
 SOURCE_VISIBILITY = 0.94  # Visibility of the entangled source
-SOURCE_WAVELENGTH = 810 * 10**-9 # Wavelength of source photons, in meters
-SOURCE_BANDWIDTH_FWHM = 3 * 10**-9 # Source bandwidth FWHM, in meters
+SOURCE_WAVELENGTH = 810 * 10**-9  # Wavelength of source photons, in meters
+SOURCE_BANDWIDTH_FWHM = 3 * 10**-9  # Source bandwidth FWHM, in meters
 
 DARK_COUNT_RATES = {
     0: 50,
@@ -56,20 +60,21 @@ DARK_COUNT_RATES = {
     6: 650,
     7: 650,
 }  # Average dark counts per second for each of the 8 detectors
-DETECTOR_JITTER = 0.690e-9 * SECOND # Time resolution of detectors (Jitter extracted from plots)
+DETECTOR_JITTER = (
+    0.690e-9 * SECOND
+)  # Time resolution of detectors (Jitter extracted from plots)
 DETECTOR_DEAD_TIME = 45e-9 * SECOND  # Dead time of detector
 
 DETECTOR_FREQ_WIDTH = SPEED_OF_LIGHT / 700e-9 - SPEED_OF_LIGHT / 900e-9
 DETECTOR_MAXIMUM_EFFICIENCY = 0.60
 
 if __name__ == "__main__":
-
     # Create folder and file name
     # Set up directory to save results
     main_folder_name = "simulation_results/"
     if not os.path.isdir(main_folder_name):
         os.mkdir(main_folder_name)
-    dir_path = main_folder_path + datetime.utcnow().strftime("%Y-%m-%d")
+    dir_path = main_folder_name + datetime.utcnow().strftime("%Y-%m-%d")
     if not os.path.isdir(dir_path):
         os.mkdir(dir_path)
 
@@ -107,7 +112,14 @@ if __name__ == "__main__":
             "num_shots": 4000000,
             "random_seed": 0,
         }
-        secure_key_rate, secure_key_rate_error, raw_key_rate, raw_key_rate_error, qber, qber_error = run_key_gen(**simulation_parameters)
+        (
+            secure_key_rate,
+            secure_key_rate_error,
+            raw_key_rate,
+            raw_key_rate_error,
+            qber,
+            qber_error,
+        ) = run_key_gen(**simulation_parameters)
         print(f"coincidence window: {coincidence_window}")
         print(f"raw_key_rate: {raw_key_rate} bps")
         print(f"secure_key_rate: {secure_key_rate} bps")
