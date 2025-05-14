@@ -93,8 +93,8 @@ if __name__ == "__main__":
     param_name = args.param_name
 
     data_folder_name = "timetagged_data/"
-    plot_folder_name = "bbm92_plots/"
-    data_file_name = datetime_now_string()
+    plot_folder_name = "experiment_bbm92_plots/"
+    data_file_name = datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S-%fZ")
 
     # Create folders
     if not os.path.isdir(data_folder_name):
@@ -128,4 +128,5 @@ if __name__ == "__main__":
     experiment_analysis[param_name] = [param_value]
     
     # Save dict with parameters and sim results to JSON file
-    write_json(experiment_analysis, plot_folder_name + data_file_name + "_manual_input_analysis")
+    with open(plot_folder_name + data_file_name + "_manual_input_analysis" + ".json", "w") as file:
+        file.write(json.dumps(experiment_analysis, indent=2))

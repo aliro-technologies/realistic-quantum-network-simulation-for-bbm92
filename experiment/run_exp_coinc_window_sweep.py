@@ -5,8 +5,9 @@ from scipy.optimize import curve_fit
 import argparse
 import os
 
+from datetime import datetime
+import json
 from analyze_data import analyze_data
-from utilities import write_json, datetime_now_string
 
 """
 To run: 
@@ -274,7 +275,7 @@ if __name__ == "__main__":
 
     data_folder_name = "timetagged_data/"
     plot_folder_name = "experiment_bbm92_plots/"
-    data_file_name = datetime_now_string()
+    data_file_name = datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S-%fZ")
 
     # Create folders
     if not os.path.isdir(data_folder_name):
@@ -316,7 +317,9 @@ if __name__ == "__main__":
     experiment_analysis["x_parameter_label"] = "Coincidence window (s)"
 
     # Save dict with parameters and sim results to JSON file
-    write_json(experiment_analysis, plot_folder_name + data_file_name + "_experimental_analysis")
+    with open(plot_folder_name + data_file_name + "_experimental_analysis" + ".json", "w") as file:
+        file.write(json.dumps(experiment_analysis, indent=2))
+
 
     # Plot and fit the source brightness.
     plot_and_fit_source_brightness(
