@@ -389,7 +389,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     data_folder_name = "timetagged_data/"
-    plot_folder_name = "experiment_bbm92_plots/"
+    plot_folder_name = "experiment_analysis_results/"
 
     # Create folders
     if not os.path.isdir(data_folder_name):

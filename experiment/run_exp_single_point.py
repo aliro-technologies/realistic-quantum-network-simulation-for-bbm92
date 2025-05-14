@@ -93,7 +93,7 @@ if __name__ == "__main__":
     param_name = args.param_name
 
     data_folder_name = "timetagged_data/"
-    plot_folder_name = "experiment_bbm92_plots/"
+    plot_folder_name = "experiment_analysis_results/"
     data_file_name = datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S-%fZ")
 
     # Create folders
