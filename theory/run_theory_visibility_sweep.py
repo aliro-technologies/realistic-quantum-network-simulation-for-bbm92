@@ -40,7 +40,7 @@ if __name__ == "__main__":
     qbers = []
 
     for visibility in visibilities:
-        probability_optical_error = (1 - visibility)/2
+        probability_optical_error = (1 - visibility) / 2
         # Make dict with parameters
         simulation_parameters = {
             "fractional_loss_A": FRACTIONAL_LOSS_A,
@@ -56,7 +56,9 @@ if __name__ == "__main__":
             "detection_resolution": DETECTION_RESOLUTION_FWHM,
         }
 
-        raw_key_rate, secure_key_rate, qber = calc_rate_and_qber(**simulation_parameters)
+        raw_key_rate, secure_key_rate, qber = calc_rate_and_qber(
+            **simulation_parameters
+        )
         secure_key_rates.append(secure_key_rate)
         raw_key_rates.append(raw_key_rate)
         qbers.append(qber)

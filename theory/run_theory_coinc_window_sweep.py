@@ -4,7 +4,9 @@ import copy
 import json
 import numpy as np
 from calc_rate_and_qber import calc_rate_and_qber
+
 """
+Estimated parameters from experimental runs:
 run: dbA, dbB, pair rate, qber, jitter, est. DCA, est. DCB
 run3: 11.4, 15.1, 1.35e6, 0.04, 690, 1000, 1000
 run4: 11.4, 15.1, 1.34e6, 0.04, 650, 1000, 1000
@@ -29,7 +31,7 @@ DARK_COUNT_RATE_A = 500  # Total per communication partner
 DARK_COUNT_RATE_B = 1800  # Total per communication partner
 P_OPTICAL_ERROR = 0.03
 NUM_DETECTORS = 4
-DETECTION_RES_ST_DEV = .690e-9
+DETECTION_RES_ST_DEV = 0.690e-9
 DETECTION_RESOLUTION_FWHM = DETECTION_RES_ST_DEV * 2 * np.sqrt(2 * np.log(2))
 
 
@@ -47,7 +49,6 @@ if __name__ == "__main__":
     # Get file name based on time
     file_name_string = datetime.utcnow().strftime("%H_%M_%S") + "_coinc_window"
     file_path = dir_path + "/" + file_name_string
-
 
     # In seconds, the coincidence windows
     coincidence_windows = np.logspace(-11, -5, 1000)
@@ -72,7 +73,9 @@ if __name__ == "__main__":
             "detection_resolution": DETECTION_RESOLUTION_FWHM,
         }
 
-        raw_key_rate, secure_key_rate, qber = calc_rate_and_qber(**simulation_parameters)
+        raw_key_rate, secure_key_rate, qber = calc_rate_and_qber(
+            **simulation_parameters
+        )
         secure_key_rates.append(secure_key_rate)
         raw_key_rates.append(raw_key_rate)
         qbers.append(qber)
@@ -81,7 +84,7 @@ if __name__ == "__main__":
     simulation_results = copy.deepcopy(simulation_parameters)
     del simulation_results["coincidence_window"]
     simulation_results["data_type"] = "numerics"
-    simulation_results["coincidence_window"] = [cw for cw in coincidence_windows]
+    simulation_results["coincidence_window"] = list(coincidence_windows)
     simulation_results["secure_key_rates"] = secure_key_rates
     simulation_results["raw_key_rates"] = raw_key_rates
     simulation_results["qbers"] = qbers
