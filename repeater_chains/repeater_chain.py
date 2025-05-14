@@ -7,7 +7,6 @@
 # distribution, or disclosure of the Software or any part thereof, in any form, is strictly
 # prohibited.
 from typing import List, Union, Dict
-import simpy
 import numpy as np
 import random
 
@@ -36,6 +35,7 @@ to start the run loop processing so that the entanglement generation starts sync
 After the end-to-end entanglement is established, Alice sends an end_sync message to the end node
 (Bob) who then resets the local qubit states.
 """
+
 
 class AliceProtocol(aqnsim.NodeProtocol):
     """
@@ -144,10 +144,14 @@ class AliceProtocol(aqnsim.NodeProtocol):
         :param qpos: The position in memory to apply the correction to
         """
         if x_corr:
-            aqnsim.eventlogger.log_apply_operation(self.parent_component.name, ops.X.name, [qpos])
+            aqnsim.eventlogger.log_apply_operation(
+                self.parent_component.name, ops.X.name, [qpos]
+            )
             yield self.qmem.operate(ops.X, qpos=qpos)
         if z_corr:
-            aqnsim.eventlogger.log_apply_operation(self.parent_component.name, ops.Z.name, [qpos])
+            aqnsim.eventlogger.log_apply_operation(
+                self.parent_component.name, ops.Z.name, [qpos]
+            )
             yield self.qmem.operate(ops.Z, qpos=qpos)
         aqnsim.eventlogger.log_generic_node_event(
             self.parent_component.name, "finished applying final correction"
@@ -216,23 +220,26 @@ class AliceProtocol(aqnsim.NodeProtocol):
                 # We apply the POVM directly in this case on a qubit and vacuum qubit (if the other
                 # qubit got lost) so here look at the state as a proxy for determining which
                 # detectors clicked.
-                qmem_state = self.entgen_proto.qmem.positions[
-                    self.entgen_proto.mem_qpos
-                ].qubit.state.state
                 if self.entgen_proto.bsm_fidelity is not None:
                     elementary_ent_generated = True
             # Now Alice needs to wait for N messages from all N repeater in the chain
             # Given all messages, Alice will know what correction to apply
-            aqnsim.simlogger.info(f"{self.parent_component.name} waiting for {self.N} message(s)")
+            aqnsim.simlogger.info(
+                f"{self.parent_component.name} waiting for {self.N} message(s)"
+            )
             yield self.await_signal(self, self.correction_completed_signal_name)
             aqnsim.eventlogger.log_rx_signal(
-                self.parent_component.name, self.name, self.correction_completed_signal_name
+                self.parent_component.name,
+                self.name,
+                self.correction_completed_signal_name,
             )
 
             # Display remaining state
             qubit = self.qmem.positions[self.qpos[1]].peek()
             state = qubit.state.state
-            aqnsim.eventlogger.log_generic_node_event(self.parent_component.name, "finished.")
+            aqnsim.eventlogger.log_generic_node_event(
+                self.parent_component.name, "finished."
+            )
             aqnsim.simlogger.info(
                 f"Remaining qubit, of ID {qubit.qubit_id}, shares state "
                 f"space with qubits {qubit.state.qubit_ids}, and with state \n{state}\n"
@@ -354,14 +361,13 @@ class BobProtocol(aqnsim.NodeProtocol):
                 # We apply the POVM directly in this case on a qubit and vacuum qubit (if the other
                 # qubit got lost) so here look at the state as a proxy for determining which
                 # detectors clicked.
-                qmem_state = self.entgen_proto.qmem.positions[
-                    self.entgen_proto.mem_qpos
-                ].qubit.state.state
                 if self.entgen_proto.bsm_fidelity is not None:
                     elementary_ent_generated = True
 
             qubit = self.qmem.positions[self.qpos[1]].peek()
-            aqnsim.eventlogger.log_generic_node_event(self.parent_component.name, "finished.")
+            aqnsim.eventlogger.log_generic_node_event(
+                self.parent_component.name, "finished."
+            )
             aqnsim.simlogger.info(f"Remaining qubit has ID {qubit.qubit_id}")
             self.entangled_qubits.append(qubit)
 
@@ -696,7 +702,9 @@ class Repeater(aqnsim.Node):
         qmemory.ports["qport2"].forward_output_to_output(self.ports["BSMport2"])
 
         # For convenience: Prepackage repeater with a repeater protocol & forward message to it
-        rep_proto = RepeaterProtocol(sim_context, qpos1=qpos1, qpos2=qpos2, qmemory_name=f"QMemory-{name}")
+        rep_proto = RepeaterProtocol(
+            sim_context, qpos1=qpos1, qpos2=qpos2, qmemory_name=f"QMemory-{name}"
+        )
         self.add_protocol(rep_proto)
 
 
@@ -811,7 +819,9 @@ def setup_network(
         repeater0 = repeater1
 
     # Lastly, add Bob
-    bob = EndNode(sim_context, n=2, op_delays=op_delays, meas_delay=meas_delay, name="Bob")
+    bob = EndNode(
+        sim_context, n=2, op_delays=op_delays, meas_delay=meas_delay, name="Bob"
+    )
     network.add_node(bob)
     bsm_link = aqnsim.MiddleBSMDualFiberLink(
         sim_context,
@@ -842,7 +852,7 @@ def setup_network(
         N=N,
         elementary_link_classical_delay=elementary_link_classical_delay,
         elementary_link_quantum_delay=elementary_link_quantum_delay,
-        qmemory_name="QMemory-Alice"
+        qmemory_name="QMemory-Alice",
     )
     bob_protocol = BobProtocol(sim_context, qmemory_name="QMemory-Bob")
 
@@ -929,7 +939,9 @@ def run_repeater_chain(
 
     for run in range(num_shots):
         # The simulation context
-        sim_context = aqnsim.SimulationContext(log_to_file=False, logging_level=0, defer_measurements=False)
+        sim_context = aqnsim.SimulationContext(
+            log_to_file=False, logging_level=0, defer_measurements=False
+        )
 
         # Instantiate environment and QuantumSimulator
         while state_fidelity is None:

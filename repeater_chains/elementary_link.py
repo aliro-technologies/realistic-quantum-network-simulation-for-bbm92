@@ -8,7 +8,6 @@
 # prohibited.
 
 from typing import Tuple, Union
-import simpy
 import random
 import numpy as np
 
@@ -66,7 +65,7 @@ class EntGenProtocol(aqnsim.MidBSMEntanglementProtocol):
             name=name,
             logging=logging,
             log_fidelity=log_fidelity,
-            qmemory_name=qmemory_name
+            qmemory_name=qmemory_name,
         )
 
     @process
@@ -98,7 +97,7 @@ def setup_network(
 ) -> aqnsim.Network:
     """
     Sets up the network for the simulation.
-    
+
     :param sim_context: The simulation context for the simulation.
     :param elementary_link_loss_in_db: The link loss in dB.
     :param elementary_link_quantum_delay: The delay for the elementary link, in seconds.
@@ -109,7 +108,7 @@ def setup_network(
     # Instantiate nodes and network that contains them
     alice = aqnsim.Node(sim_context, name="Alice")
     bob = aqnsim.Node(sim_context, name="Bob")
-    network = aqnsim.Network(sim_context)#, nodes=[alice, bob])
+    network = aqnsim.Network(sim_context)  # , nodes=[alice, bob])
     network.add_node(alice)
     network.add_node(bob)
 
@@ -124,11 +123,15 @@ def setup_network(
     meas_delay = 0 * SECOND
 
     # Instantiate qmemories and add to nodes
-    memory1 = aqnsim.QMemory(sim_context, n=2, meas_delay=meas_delay, name="QMemory-Alice")
+    memory1 = aqnsim.QMemory(
+        sim_context, n=2, meas_delay=meas_delay, name="QMemory-Alice"
+    )
     memory1.set_op_delays(op_delays=op_delays)
     alice.add_qmemory(memory1)
 
-    memory2 = aqnsim.QMemory(sim_context, n=2, meas_delay=meas_delay, name="QMemory-Bob")
+    memory2 = aqnsim.QMemory(
+        sim_context, n=2, meas_delay=meas_delay, name="QMemory-Bob"
+    )
     memory2.set_op_delays(op_delays=op_delays)
     bob.add_qmemory(memory2)
 
@@ -156,7 +159,7 @@ def setup_network(
         bsm_noise=qubit_noise_model,
         apply_msg_dependent_delay=False,
         refractive_index=1,
-        name=f"bsm_link",
+        name="bsm_link",
     )
 
     network.add_link(
@@ -164,7 +167,8 @@ def setup_network(
         node1_name=alice.name,
         node2_name=bob.name,
         port1_name="port",
-        port2_name="port")
+        port2_name="port",
+    )
     return network
 
 
@@ -183,10 +187,18 @@ def setup_protocols(
     """
     # Indicate that we want Alice to do a correction
     alice_protocol = EntGenProtocol(
-        sim_context, cport_name="port", correction=True, log_fidelity=True, qmemory_name="QMemory-Alice"
+        sim_context,
+        cport_name="port",
+        correction=True,
+        log_fidelity=True,
+        qmemory_name="QMemory-Alice",
     )
     bob_protocol = EntGenProtocol(
-        sim_context, cport_name="port", correction=False, log_fidelity=True, qmemory_name="QMemory-Bob"
+        sim_context,
+        cport_name="port",
+        correction=False,
+        log_fidelity=True,
+        qmemory_name="QMemory-Bob",
     )
     alice.add_protocol(alice_protocol)
     bob.add_protocol(bob_protocol)
@@ -213,7 +225,9 @@ def check_example(alice_protocol: aqnsim.Protocol, bob_protocol: aqnsim.Protocol
 
     if alice_fidelity is not None and bob_fidelity is not None:
         # No photon loss for either Alice or Bob
-        output_state = alice_protocol.parent_component.qmemory.positions[1].qubit.state.state
+        output_state = alice_protocol.parent_component.qmemory.positions[
+            1
+        ].qubit.state.state
         state_fidelity = aqnsim.compute_fidelity(output_state, EXPECTED_STATE_DENSITY)
     else:
         state_fidelity = None
@@ -251,7 +265,9 @@ def run_elementary_link_simulation(
     state_fidelity = None
 
     for run in range(num_shots):
-        sim_context = aqnsim.SimulationContext(log_to_file=False, logging_level=0, defer_measurements=False)
+        sim_context = aqnsim.SimulationContext(
+            log_to_file=False, logging_level=0, defer_measurements=False
+        )
 
         # Instantiate environment and QuantumSimulator
         while state_fidelity is None:
@@ -266,7 +282,7 @@ def run_elementary_link_simulation(
                 elementary_link_quantum_delay,
                 fiber1_length,
                 fiber2_length,
-                depolarizing_prob
+                depolarizing_prob,
             )
             [alice, bob] = network.nodes
             alice_protocol, bob_protocol = setup_protocols(sim_context, alice, bob)

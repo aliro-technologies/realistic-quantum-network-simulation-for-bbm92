@@ -9,7 +9,7 @@ from repeater_chain import run_repeater_chain
 
 
 """
-To run: 
+To run:
 `python run_repeater_chain_loss_sweep.py`
 """
 
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     )
     elementary_link_quantum_delay = 1
     elementary_link_classical_delay = 0
-    BSM_efficiency = 1/2
+    BSM_efficiency = 1 / 2
     BSM_loss = -10 * np.log10(BSM_efficiency)
 
     num_data_points = 8
@@ -53,7 +53,8 @@ if __name__ == "__main__":
             "random_seed": random_seed,
             "num_shots": num_shots,
             "num_repeaters": num_repeaters,
-            "elementary_link_loss_in_db": link_loss_in_db + BSM_loss,  # Channel loss probability, in dB. Multiply by BSM efficiency
+            "elementary_link_loss_in_db": link_loss_in_db
+            + BSM_loss,  # Channel loss probability, in dB with added BSM loss, in dB.
             "elementary_link_quantum_delay": elementary_link_quantum_delay,  # Channel delay for qubits, in seconds
             "elementary_link_classical_delay": elementary_link_classical_delay,  # Channel delay for classical messages, in seconds
             "H_delay": 0,  # Hadamard delay, in seconds
@@ -62,7 +63,7 @@ if __name__ == "__main__":
             "CNOT_delay": 0,  # CNOT gate delay, in seconds
             "meas_delay": 0,  # Measurement delay, in seconds
             "bsm_delay": 0,  # Delay for BSM application, in seconds
-            "depolarizing_prob": 0, # Depolarizing probability per qubit
+            "depolarizing_prob": 0,  # Depolarizing probability per qubit
             "file_name": file_path,
         }
 

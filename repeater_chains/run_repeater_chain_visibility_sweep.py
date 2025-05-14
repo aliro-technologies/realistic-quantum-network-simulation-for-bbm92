@@ -10,7 +10,7 @@ from elementary_link import run_elementary_link_simulation
 
 
 """
-To run: 
+To run:
 `python run_repeater_chain_visibility_sweep.py`
 """
 
@@ -33,20 +33,19 @@ def run_n_repeater_chain_sims(num_repeaters, total_link_loss):
     file_path = dir_path + "/" + file_name_string
 
     random_seed = 1
-    num_shots = 10#1000 # Number of shots to simulate #10
+    num_shots = 10  # 1000 # Number of shots to simulate #10
     elementary_link_quantum_delay = 1
-    elementary_link_classical_delay = 0 # Can modify this from 0 as needed
-    BSM_efficiency = 1/2
+    elementary_link_classical_delay = 0  # Can modify this from 0 as needed
+    BSM_efficiency = 1 / 2
     BSM_loss = -10 * np.log10(BSM_efficiency)
 
-    num_data_points = 4#30 #4
+    num_data_points = 4  # 30 #4
     depol_probs = list(np.linspace(0, 0.05, num_data_points))
 
     fidelities = []
     ent_gen_times = []
 
     for i, depol_prob in enumerate(depol_probs):
-
         # Run simulation with passed in simulation parameters
         # Run many simulations and find the average simulated time and ending fidelity.
 
@@ -57,7 +56,8 @@ def run_n_repeater_chain_sims(num_repeaters, total_link_loss):
             "random_seed": random_seed,
             "num_shots": num_shots,
             "num_repeaters": num_repeaters,
-            "elementary_link_loss_in_db": link_loss_in_db + BSM_loss,  # Channel loss probability, in dB
+            "elementary_link_loss_in_db": link_loss_in_db
+            + BSM_loss,  # Channel loss probability, in dB with added BSM loss, in dB
             "elementary_link_quantum_delay": elementary_link_quantum_delay,  # Channel delay for qubits, in seconds
             "elementary_link_classical_delay": elementary_link_classical_delay,  # Channel delay for classical messages, in seconds
             "H_delay": 0,  # Hadamard delay, in seconds
@@ -66,7 +66,7 @@ def run_n_repeater_chain_sims(num_repeaters, total_link_loss):
             "CNOT_delay": 0,  # CNOT gate delay, in seconds
             "meas_delay": 0,  # Measurement delay, in seconds
             "bsm_delay": 0,  # Delay for BSM application, in seconds
-            "depolarizing_prob": depol_prob, # Depolarizing probability per qubit
+            "depolarizing_prob": depol_prob,  # Depolarizing probability per qubit
             "file_name": file_path,
         }
 
@@ -87,6 +87,7 @@ def run_n_repeater_chain_sims(num_repeaters, total_link_loss):
     with open(file_path + "_sim_results" + ".json", "w") as file:
         file.write(json.dumps(simulation_results, indent=2))
 
+
 def run_elementary_link_sim(total_link_loss):
     """
     Simulate elementary link entanglement generation with loss, given loss is implemented through qubit deletion.
@@ -105,12 +106,12 @@ def run_elementary_link_sim(total_link_loss):
     file_path = dir_path + "/" + file_name_string
 
     random_seed = 1
-    num_shots = 3 # Number of shots to simulate #10 #1000
+    num_shots = 3  # Number of shots to simulate #10 #1000
     elementary_link_quantum_delay = 1
-    BSM_efficiency = 1/2
+    BSM_efficiency = 1 / 2
     BSM_loss = -10 * np.log10(BSM_efficiency)
 
-    num_data_points = 2 #4 #30
+    num_data_points = 2  # 4 #30
     depol_probs = list(np.linspace(0, 0.05, num_data_points))
 
     fidelities = []
@@ -123,12 +124,15 @@ def run_elementary_link_sim(total_link_loss):
         simulation_parameters = {
             "random_seed": random_seed,
             "num_shots": num_shots,
-            "elementary_link_loss_in_db": link_loss_in_db + BSM_loss,  # Channel loss probability, in dB
+            "elementary_link_loss_in_db": link_loss_in_db
+            + BSM_loss,  # Channel loss probability, in dB
             "elementary_link_quantum_delay": elementary_link_quantum_delay,  # Channel delay for qubits, in seconds
-            "depolarizing_prob": depol_prob, # Depolarizing probability per qubit
+            "depolarizing_prob": depol_prob,  # Depolarizing probability per qubit
         }
 
-        fidelity_set, ent_gen_set = run_elementary_link_simulation(**simulation_parameters)
+        fidelity_set, ent_gen_set = run_elementary_link_simulation(
+            **simulation_parameters
+        )
 
         fidelities += [fidelity_set]
         ent_gen_times += [ent_gen_set]
@@ -148,8 +152,13 @@ def run_elementary_link_sim(total_link_loss):
 
 
 if __name__ == "__main__":
-    num_repeaters_list = [0, 1, 2, 3] # Number of repeaters (Alice and Bob, the end nodes, are counted separately)
-    total_list_loss_list = [5, 20] # Total loss for all links, in dB
+    num_repeaters_list = [
+        0,
+        1,
+        2,
+        3,
+    ]  # Number of repeaters (Alice and Bob, the end nodes, are counted separately)
+    total_list_loss_list = [5, 20]  # Total loss for all links, in dB
     for n in num_repeaters_list:
         for t in total_list_loss_list:
             if n == 0:

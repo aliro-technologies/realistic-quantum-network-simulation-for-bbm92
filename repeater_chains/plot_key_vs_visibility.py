@@ -1,16 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-from datetime import datetime
 import os
 import json
 
 """
-To run: 
+To run:
 `python plot_key_vs_visibility.py -f [FOLDER_PATH_NAME]`
 where FOLDER_PATH_NAME is the path of the folder containing simulations generated from running `run_repeater_chain_visibility_sweep.py`.
 """
 SMALL_FIG = True
+
 
 def calc_secure_key_rates(fidelities, time_means, time_errs=None):
     """
@@ -21,13 +21,13 @@ def calc_secure_key_rates(fidelities, time_means, time_errs=None):
     :param time_errs: The error for the mean time to entanglement generation.
     """
     # Convert fidelities into QBERs
-    qbers = (1 - fidelities) * (2/3)
+    qbers = (1 - fidelities) * (2 / 3)
 
     # Calculate predicted secure key rates
     # 1/2 for sifting step
-    raw_key_rate_means = (1/2) * 1/time_means
+    raw_key_rate_means = (1 / 2) * 1 / time_means
     if time_errs is not None:
-        raw_key_rate_errs = (1/2) * (1/time_means)**2 * time_errs
+        raw_key_rate_errs = (1 / 2) * (1 / time_means) ** 2 * time_errs
 
     def binary_entropy_function(x):
         if 0 < x < 1:
@@ -36,7 +36,7 @@ def calc_secure_key_rates(fidelities, time_means, time_errs=None):
             return 0
 
     binary_entropy = np.array([binary_entropy_function(q) for q in qbers])
-   
+
     # Find secure key rate
     secure_key_rate_means = raw_key_rate_means * (1 - 2.1 * binary_entropy)
     secure_key_rate_means = [max(0, rate) for rate in secure_key_rate_means]
@@ -53,9 +53,12 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
     """
     :param simulation_results_folder_path: File path for the simulation results contained in a dict.
     """
-    sim_file_names = [f for f in os.listdir(simulation_results_folder_path)
-                      if os.path.isfile(os.path.join(simulation_results_folder_path, f))
-                      and f.lower().endswith('.json')]
+    sim_file_names = [
+        f
+        for f in os.listdir(simulation_results_folder_path)
+        if os.path.isfile(os.path.join(simulation_results_folder_path, f))
+        and f.lower().endswith(".json")
+    ]
 
     sorted_sim_file_names = sorted(sim_file_names)
 
@@ -76,7 +79,9 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
             simulation_results = json.load(file)
 
         num_repeaters = simulation_results["num_repeaters"]
-        elementary_link_quantum_delay = simulation_results["elementary_link_quantum_delay"]
+        elementary_link_quantum_delay = simulation_results[
+            "elementary_link_quantum_delay"
+        ]
         num_shots = simulation_results["num_shots"]
         total_loss_in_db = simulation_results["total_loss_in_db"]
 
@@ -101,18 +106,22 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
             np.size(ent_gen_times, axis=1)
         )
 
-        sim_secure_key_rates, sim_secure_key_rate_errs = calc_secure_key_rates(sim_fidelity_means, sim_time_means, sim_time_errs)
+        sim_secure_key_rates, sim_secure_key_rate_errs = calc_secure_key_rates(
+            sim_fidelity_means, sim_time_means, sim_time_errs
+        )
 
-        color = colors((num_repeaters) + (int(total_loss_in_db/5)-1) * 4)
-        print((num_repeaters) + (int(total_loss_in_db/5)-1) * 4)
+        color = colors((num_repeaters) + (int(total_loss_in_db / 5) - 1) * 4)
+        print((num_repeaters) + (int(total_loss_in_db / 5) - 1) * 4)
 
-        elementary_pair_fidelities = 1 + (-(3/2) + (3/4)*depolarizing_probs)*depolarizing_probs
+        elementary_pair_fidelities = (
+            1 + (-(3 / 2) + (3 / 4) * depolarizing_probs) * depolarizing_probs
+        )
 
         axs.errorbar(
             elementary_pair_fidelities,
             sim_secure_key_rates,
             sim_secure_key_rate_errs,
-            fmt='none',
+            fmt="none",
             color=color,
             capsize=2,
             linewidth=2,
@@ -121,15 +130,19 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
 
         axs.set_ylabel("Secure key rate ($c/L_0$)")
 
-        ## Calculate and plot theory curve
-        p1 = 1 # Single qubit depolarizing during entanglement swap
-        p2 = 1 # Two qubit depolarizing during entanglement swap
-        eta = 1 # Measurement error
-        L = num_repeaters + 1 # Number of elementary links
+        # Calculate and plot theory curve
+        p1 = 1  # Single qubit depolarizing during entanglement swap
+        p2 = 1  # Two qubit depolarizing during entanglement swap
+        eta = 1  # Measurement error
+        L = num_repeaters + 1  # Number of elementary links
 
         # Below, from Briegel 1998
-        elementary_pair_fidelities_theory = np.linspace(elementary_pair_fidelities[0], elementary_pair_fidelities[-1], 500)
-        theory_fidelities = (1/4) + (3/4)*(p1 * p2 *(4 * eta**2 - 1)/3)**(L-1)*((4*elementary_pair_fidelities_theory - 1)/3)**L
+        elementary_pair_fidelities_theory = np.linspace(
+            elementary_pair_fidelities[0], elementary_pair_fidelities[-1], 500
+        )
+        theory_fidelities = (1 / 4) + (3 / 4) * (p1 * p2 * (4 * eta**2 - 1) / 3) ** (
+            L - 1
+        ) * ((4 * elementary_pair_fidelities_theory - 1) / 3) ** L
 
         # Calculate analytical rates
         nesting_level = np.log2(num_repeaters + 1)
@@ -138,25 +151,39 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
             theory_rate = (3 - 2 * P0) * elementary_link_quantum_delay / ((2 - P0) * P0)
         else:
             # Approximation for average time to entanglement for n repeaters
-            theory_rate = (3 / 2) ** nesting_level * elementary_link_quantum_delay * 1 / P0
+            theory_rate = (
+                (3 / 2) ** nesting_level * elementary_link_quantum_delay * 1 / P0
+            )
 
         if num_repeaters > 1:
-            theory_label = f"Est. theory: r = {num_repeaters}, $\\beta$ = {total_loss_in_db} dB"
+            theory_label = (
+                f"Est. theory: r = {num_repeaters}, $\\beta$ = {total_loss_in_db} dB"
+            )
         else:
-            theory_label = f"Theory: r = {num_repeaters}, $\\beta$ = {total_loss_in_db} dB"
+            theory_label = (
+                f"Theory: r = {num_repeaters}, $\\beta$ = {total_loss_in_db} dB"
+            )
 
-        theory_secure_key_rates, _ = calc_secure_key_rates(theory_fidelities, theory_rate)
+        theory_secure_key_rates, _ = calc_secure_key_rates(
+            theory_fidelities, theory_rate
+        )
         axs.plot(
             elementary_pair_fidelities_theory,
             theory_secure_key_rates,
             color=color,
             linewidth=1,
-            linestyle=':',
+            linestyle=":",
             label=theory_label,
         )
-    
+
     axs.grid(True, linestyle="--", linewidth=0.5)
-    fig.legend(frameon=False, fontsize=7.5, loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=3)
+    fig.legend(
+        frameon=False,
+        fontsize=7.5,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.0),
+        ncol=3,
+    )
     plt.subplots_adjust(top=0.80)
     axs.set_xlabel("Elementary link Werner state fidelity")
     plt.yscale("log")
@@ -178,7 +205,11 @@ if __name__ == "__main__":
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--folder-name", help="Folder name with simulation result files")
+    parser.add_argument(
+        "-f", "--folder-name", help="Folder name with simulation result files"
+    )
     args = parser.parse_args()
 
-    plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path= args.folder_name + "/")
+    plot_rate_vs_loss_n_repeaters_with_theory(
+        simulation_results_folder_path=args.folder_name + "/"
+    )

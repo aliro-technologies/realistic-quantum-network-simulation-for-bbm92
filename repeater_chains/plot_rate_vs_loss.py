@@ -1,22 +1,23 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-from datetime import datetime
-import os
 import json
 
 """
-To run: 
+To run:
 `python plot_rate_vs_loss.py -f [FILE_PATH_NAME]`
 where FILE_PATH_NAME is the name of the file path (without the extension) generated from running `run_repeater_chain_loss_sweep.py`.
 """
 SMALL_FIG = True
 
+
 def plot_rate_vs_loss_one_repeater(simulation_results_file_path):
     """
     :param simulation_results_file_path: File path for the simulation results contained in a dict.
     """
-    import pdb; pdb.set_trace()
+    import pdb
+
+    pdb.set_trace()
 
     with open(simulation_results_file_path + ".json") as file:
         simulation_results = json.load(file)
@@ -32,7 +33,9 @@ def plot_rate_vs_loss_one_repeater(simulation_results_file_path):
     # Calculate analytical rates
     nesting_level = np.log2(num_repeaters + 1)
     elementary_link_transmittivities = pow(10, -link_losses_in_db / 10)
-    P0 = elementary_link_transmittivities * BSM_efficiency # 1/2 for linear optical BSM efficiency
+    P0 = (
+        elementary_link_transmittivities * BSM_efficiency
+    )  # 1/2 for linear optical BSM efficiency
 
     upper_bound_theory_curve = 1 / P0 * 2**nesting_level * elementary_link_quantum_delay
     lower_bound_theory_curve = 1 / P0 * elementary_link_quantum_delay
@@ -66,9 +69,9 @@ def plot_rate_vs_loss_one_repeater(simulation_results_file_path):
     )
     axs.errorbar(
         link_losses_in_db,
-        1/sim_time_means,
-        (1/sim_time_means)**2 * sim_time_errs,
-        fmt='none',
+        1 / sim_time_means,
+        (1 / sim_time_means) ** 2 * sim_time_errs,
+        fmt="none",
         color=colors(0),
         capsize=8,
         label="AQNSim",
@@ -78,7 +81,7 @@ def plot_rate_vs_loss_one_repeater(simulation_results_file_path):
 
     axs.plot(
         link_losses_in_db,
-        1/theory_curve,
+        1 / theory_curve,
         color=colors(1),
         label="Theory",
     )
