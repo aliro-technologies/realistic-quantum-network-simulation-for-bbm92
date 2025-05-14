@@ -67,7 +67,6 @@ class SendProtocol(aqnsim.NodeProtocol):
     Node protocol for sending entangled photon pairs.
 
     :param sim_context: The simulation context to use.
-    :param node: The node on which the protocol acts.
     :param source_pair_rate: The average pair generation rate, in Hz (not stochastic).
     :param num_shots: The number of shots to simulate.
     :param minimum_time_resolution: The minimum time resolution.
@@ -75,21 +74,22 @@ class SendProtocol(aqnsim.NodeProtocol):
     :param detector_dead_time: The detector dead time, in seconds.
     :param dark_count_rates: The dark count rate (in cps) per detector.
     :param name: The name of the protocol.
+    :param qmemory_name: The name of the memory used in this protocol.
     """
 
     def __init__(
         self,
         sim_context: SimulationContext,
-        node: aqnsim.Node,
         source_pair_rate: float,
         num_shots: int,
         minimum_time_resolution: float,
         detector_jitter: float,
         detector_dead_time: float,
         dark_count_rates: dict,
-        name: str = None
+        name: str = None,
+        qmemory_name: str = None,
         ):
-        super().__init__(sim_context=sim_context, node=node, name=name)
+        super().__init__(sim_context=sim_context, name=name)
         self.qs = sim_context.qs
         self.source_pair_rate = source_pair_rate
         self.num_shots = num_shots
@@ -119,7 +119,7 @@ class SendProtocol(aqnsim.NodeProtocol):
                      "alice_basis_choices": self.alice_basis_choices,
                      "bob_basis_choices": self.bob_basis_choices}
         )
-        self.node.ports["classical_channel_port"].rx_output(msg)
+        self.parent_component.ports["classical_channel_port"].rx_output(msg)
 
     @aqnsim.process
     def run(self):
@@ -131,7 +131,7 @@ class SendProtocol(aqnsim.NodeProtocol):
         # many shots, triggering the source is necessary.
         # The stochastic time between photons is simulated after measurements are completed
         # by repeatedly drawing from a Poissonian distribution.
-        self.node.subcomponents["entangled_photon_source"].trigger()
+        self.parent_component.subcomponents["entangled_photon_source"].trigger()
         yield self.wait(1 / self.source_pair_rate)
 
         if len(self.qs.deferred_measurements) > 0:
@@ -213,23 +213,20 @@ class ReceiveProtocol(aqnsim.NodeProtocol):
     and use the measurements to generate a shared secret key.
 
     :param sim_context: The simulation context to use.
-    :param node: The node on which the protocol acts.
     :param detector_jitter: The jitter of the detector, in seconds.
     :param name: The name of the protocol.
+    :param qmemory_name: The name of the memory used in this protocol.
     """
 
-    def __init__(self, sim_context: SimulationContext, node: aqnsim.Node,
+    def __init__(self, sim_context: SimulationContext,
                  detector_jitter: float, minimum_time_resolution: float, 
-                 name: str = None):
-        super().__init__(sim_context=sim_context, node=node, name=name)
+                 name: str = None, qmemory_name: str = None):
+        super().__init__(sim_context=sim_context, name=name)
 
         # track the quantum simulator instance
         self.qs = sim_context.qs
 
         self.minimum_time_resolution = minimum_time_resolution
-
-        # set up classical channel input handler
-        self.node.ports["classical_channel_port"].add_rx_input_handler(handler=self.input_handler_classical)
 
         # create signals
         self.add_signal(MEASUREMENTS_COMPLETE_SIGNAL_NAME)
@@ -244,23 +241,30 @@ class ReceiveProtocol(aqnsim.NodeProtocol):
         # Create a GaussianDelayModel to model detector jitter
         self.jitter_model = aqnsim.GaussianDelayModel(mean=0, std=detector_jitter)
 
+    def initialize(self, parent_component=None):
+        super().initialize(parent_component)
+        
+        # set up classical channel input handler
+        self.parent_component.ports["classical_channel_port"].add_rx_input_handler(handler=self.input_handler_classical)
+
+
     def input_handler_classical(self, msg: aqnsim.CMessage):
         """Handler for messages communicated over the classical channel"""
         if not isinstance(msg, aqnsim.CMessage):
             aqnsim.simlogger.warning(
-                f"classical channel input handler at {self.node.name} received message with unexpected data type"
+                f"classical channel input handler at {self.parent_component.name} received message with unexpected data type"
             )
         classical_msg_action = msg.action
         if classical_msg_action == "MEASUREMENTS_COMPLETE":
             # Stop processing new photodetector counts
-            node_name = self.node.name
-            self.node.subcomponents[f"{node_name}_detector_0_0"].ports["cout0"].rx_output_handlers = []
-            self.node.subcomponents[f"{node_name}_detector_0_1"].ports["cout0"].rx_output_handlers = []
-            self.node.subcomponents[f"{node_name}_detector_1_0"].ports["cout0"].rx_output_handlers = []
-            self.node.subcomponents[f"{node_name}_detector_1_1"].ports["cout0"].rx_output_handlers = []
+            node_name = self.parent_component.name
+            self.parent_component.subcomponents[f"{node_name}_detector_0_0"].ports["cout0"].rx_output_handlers = []
+            self.parent_component.subcomponents[f"{node_name}_detector_0_1"].ports["cout0"].rx_output_handlers = []
+            self.parent_component.subcomponents[f"{node_name}_detector_1_0"].ports["cout0"].rx_output_handlers = []
+            self.parent_component.subcomponents[f"{node_name}_detector_1_1"].ports["cout0"].rx_output_handlers = []
 
             # Save basises and measurements
-            if self.node.name == "Bob":
+            if self.parent_component.name == "Bob":
                 self.basis_choices = msg.content["bob_basis_choices"]
                 self.measurements = msg.content["bob_measurements"]
             else:
@@ -330,15 +334,15 @@ class ReceiveProtocol(aqnsim.NodeProtocol):
             status=aqnsim.StatusMessages.SUCCESS,
             content={"basis_choices": basis_choices},
         )
-        self.node.ports["classical_channel_port"].rx_output(msg)
+        self.parent_component.ports["classical_channel_port"].rx_output(msg)
 
     @aqnsim.process
     def run(self):
         """Main run method of the protocol"""
         yield self.await_signal(self, MEASUREMENTS_COMPLETE_SIGNAL_NAME)
-        self._send_basis_choices(self.node.name)
+        self._send_basis_choices(self.parent_component.name)
         yield self.await_signal(self, CLASSICAL_MSG_RECEIVED_SIGNAL_NAME)
-        self._process_classical_message(self.node.name)
+        self._process_classical_message(self.parent_component.name)
 
 
 """
@@ -475,9 +479,8 @@ def setup_network(
     )
 
     # attach protocols to the nodes
-    SendProtocol(
+    phoebe_protocol = SendProtocol(
         sim_context=sim_context,
-        node=phoebe,
         source_pair_rate=source_pair_rate,
         num_shots=num_shots,
         minimum_time_resolution=minimum_time_resolution,
@@ -485,18 +488,19 @@ def setup_network(
         detector_dead_time=detector_dead_time,
         dark_count_rates=dark_count_rates,
     )
-    ReceiveProtocol(
+    phoebe.add_protocol(phoebe_protocol)
+    alice_protocol = ReceiveProtocol(
         sim_context=sim_context,
-        node=alice,
         detector_jitter=detector_jitter,
         minimum_time_resolution=minimum_time_resolution,
     )
-    ReceiveProtocol(
+    alice.add_protocol(alice_protocol)
+    bob_protocol = ReceiveProtocol(
         sim_context=sim_context,
-        node=bob,
         detector_jitter=detector_jitter,
         minimum_time_resolution=minimum_time_resolution,
     )
+    bob.add_protocol(bob_protocol)
 
     return network
 

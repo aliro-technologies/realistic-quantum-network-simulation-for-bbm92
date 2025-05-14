@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     # Create folder and file name
     # Set up directory to save results
-    main_folder_name = "bbm92_simulation_results/"
+    main_folder_name = "simulation_results/"
     if not os.path.isdir(main_folder_name):
         os.mkdir(main_folder_name)
     dir_path = main_folder_path + datetime.utcnow().strftime("%Y-%m-%d")

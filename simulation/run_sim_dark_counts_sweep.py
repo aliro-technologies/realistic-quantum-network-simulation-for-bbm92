@@ -12,6 +12,7 @@ import numpy as np
 import copy
 from datetime import datetime
 import json
+import os
 
 import aqnsim
 from aqnsim import SECOND, TERAHERTZ, SPEED_OF_LIGHT, NANOSECOND, DEFAULT_REFRACTIVE_INDEX
@@ -39,10 +40,10 @@ if __name__ == "__main__":
 
     # Create folder and file name
     # Set up directory to save results
-    main_folder_name = "bbm92_simulation_results/"
+    main_folder_name = "simulation_results/"
     if not os.path.isdir(main_folder_name):
         os.mkdir(main_folder_name)
-    dir_path = main_folder_path + datetime.utcnow().strftime("%Y-%m-%d")
+    dir_path = main_folder_name + datetime.utcnow().strftime("%Y-%m-%d")
     if not os.path.isdir(dir_path):
         os.mkdir(dir_path)
 
