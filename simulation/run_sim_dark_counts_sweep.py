@@ -6,13 +6,11 @@
 # protected by intellectual property laws and treaties. Unauthorized reproduction, use,
 # distribution, or disclosure of the Software or any part thereof, in any form, is strictly
 # prohibited.
-from simulate_bbm92 import run_key_gen
-
-import numpy as np
+import os
+import json
 import copy
 from datetime import datetime
-import json
-import os
+import numpy as np
 
 from aqnsim import (
     SECOND,
@@ -20,6 +18,8 @@ from aqnsim import (
     NANOSECOND,
     DEFAULT_REFRACTIVE_INDEX,
 )
+
+from simulate_bbm92 import run_key_gen
 
 # Simulation parameters
 CHANNEL_LENGTH = 1  # in meters

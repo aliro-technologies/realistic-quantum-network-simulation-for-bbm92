@@ -68,7 +68,7 @@ class SendProtocol(aqnsim.NodeProtocol):
     Node protocol for sending entangled photon pairs.
 
     :param sim_context: The simulation context to use.
-    :param source_pair_rate: The average pair generation rate, in Hz (not stochastic).
+    :param source_pair_rate: The average pair generation rate, in counts per second (stochastic).
     :param num_shots: The number of shots to simulate.
     :param minimum_time_resolution: The minimum time resolution.
     :param detector jitter: RMS jitter of the detector.
@@ -150,7 +150,7 @@ class SendProtocol(aqnsim.NodeProtocol):
             # Create a dict of detection data from the source
             source_detection_times = {}
             prev_temporal_offset = 0
-            for k, detector_outcomes in enumerate(detection_data["detector_outcomes"]):
+            for _, detector_outcomes in enumerate(detection_data["detector_outcomes"]):
                 temporal_offset = (
                     self.source_delay_model.get_delay() + prev_temporal_offset
                 )
@@ -465,7 +465,6 @@ def setup_network(
     _setup_source_node(
         sim_context=sim_context,
         node=phoebe,
-        source_pair_rate=source_pair_rate,
         source_visibility=source_visibility,
         source_wavelength=source_wavelength,
         source_bandwidth_fwhm_wavelength=source_bandwidth_fwhm_wavelength,
@@ -478,7 +477,6 @@ def setup_network(
             sim_context=sim_context,
             node=node,
             source_wavelength=source_wavelength,
-            detector_dead_time=detector_dead_time,
             detector_maximum_efficiency=detector_maximum_efficiency,
             detector_freq_width=detector_freq_width,
         )
@@ -573,7 +571,6 @@ def setup_network(
 def _setup_source_node(
     sim_context: aqnsim.SimulationContext,
     node: aqnsim.Node,
-    source_pair_rate: float,
     source_visibility: float,
     source_wavelength: float,
     source_bandwidth_fwhm_wavelength: float,
@@ -583,9 +580,6 @@ def _setup_source_node(
 
     :param sim_context: The simulation context to use.
     :param node: The node that will have the entanglement source added to it.
-    :param source_pair_rate: The source brightness immediately out of the source,
-        in counts per second. Calculated as CAR = 1 / (B * t_cc) where CAR is
-        coincidence to accidental ratio, B is brightness, and t_cc is collection time.
     :param source_visibility: The source visibility.
     :param source_wavelength: The source wavelength.
     :param source_bandwidth_fwhm_wavelength: The source FWHM bandwidth, in wavelengths.
@@ -648,7 +642,6 @@ def _setup_receiving_node(
     sim_context: aqnsim.SimulationContext,
     node: aqnsim.Node,
     source_wavelength: float,
-    detector_dead_time: float,
     detector_maximum_efficiency: float,
     detector_freq_width: float,
 ):
@@ -658,7 +651,6 @@ def _setup_receiving_node(
     :param sim_context: The simulation context to run the simulation.
     :param node: The Node which will be the recieving node.
     :param source_wavelength: The source wavelength.
-    :param detector_dead_time: The detector dead time, in seconds.
     :param detector_maximum_efficiency: The detector max efficiency (unitless fraction).
     :param detector_freq_width: The detector frequency width, in Hz.
     """

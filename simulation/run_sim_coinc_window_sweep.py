@@ -6,19 +6,18 @@
 # protected by intellectual property laws and treaties. Unauthorized reproduction, use,
 # distribution, or disclosure of the Software or any part thereof, in any form, is strictly
 # prohibited.
-from simulate_bbm92 import run_key_gen
-
-import numpy as np
+import os
+import json
 import copy
 from datetime import datetime
-import json
-import os
+import numpy as np
 
 from aqnsim import (
     SECOND,
     SPEED_OF_LIGHT,
     DEFAULT_REFRACTIVE_INDEX,
 )
+from simulate_bbm92 import run_key_gen
 
 """
 run: dbA, dbB, pair rate, qber, jitter, est. DCA, est. DCB
@@ -135,7 +134,7 @@ if __name__ == "__main__":
     simulation_results = copy.deepcopy(simulation_parameters)
     del simulation_results["minimum_time_resolution"]
     simulation_results["data_type"] = "aqnsim"
-    simulation_results["coincidence_window"] = [cw for cw in coincidence_windows]
+    simulation_results["coincidence_window"] = list(coincidence_windows)
     simulation_results["secure_key_rates"] = secure_key_rates
     simulation_results["secure_key_rate_errors"] = secure_key_rate_errors
     simulation_results["raw_key_rates"] = raw_key_rates
