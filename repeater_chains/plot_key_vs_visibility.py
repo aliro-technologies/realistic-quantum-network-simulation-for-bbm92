@@ -3,11 +3,12 @@ import numpy as np
 import argparse
 from datetime import datetime
 import os
+import json
 
 """
 To run: 
-`python plot_key_vs_visibility.py -f [FOLDER_NAME]`
-where FOLDER_NAME is the name of the file generated from running `run_repeater_chain_visibility_sweep.py`.
+`python plot_key_vs_visibility.py -f [FOLDER_PATH_NAME]`
+where FOLDER_PATH_NAME is the path of the folder containing simulations generated from running `run_repeater_chain_visibility_sweep.py`.
 """
 SMALL_FIG = True
 
@@ -175,12 +176,9 @@ if __name__ == "__main__":
     """
     Plot BBM92 secure key rate vs visibility.
     """
-    main_folder_name = "repeater_chain_results"
-    if not os.path.isdir(main_folder_name):
-        os.mkdir(main_folder_name)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--folder-name", help="Folder name with simulation result files")
     args = parser.parse_args()
 
-    plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path=main_folder_name + "/" + args.folder_name + "/")
+    plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path= args.folder_name + "/")

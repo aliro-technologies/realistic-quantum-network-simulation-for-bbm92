@@ -4,6 +4,7 @@ import copy
 
 import uuid
 import os
+import json
 from repeater_chain import run_repeater_chain
 from elementary_link import run_elementary_link_simulation
 
@@ -78,7 +79,7 @@ def run_n_repeater_chain_sims(num_repeaters, total_link_loss):
     simulation_results = copy.deepcopy(simulation_parameters)
     del simulation_results["depolarizing_prob"]
     simulation_results["depolarizing_probs"] = depol_probs
-    simulation_results["total_loss_in_db"] = total_loss_in_db
+    simulation_results["total_loss_in_db"] = total_link_loss
     simulation_results["fidelities"] = fidelities
     simulation_results["ent_gen_times"] = ent_gen_times
     simulation_results["BSM_efficiency"] = BSM_efficiency
@@ -104,12 +105,12 @@ def run_elementary_link_sim(total_link_loss):
     file_path = dir_path + "/" + file_name_string
 
     random_seed = 1
-    num_shots = 1000 # Number of shots to simulate #10
+    num_shots = 3 # Number of shots to simulate #10 #1000
     elementary_link_quantum_delay = 1
     BSM_efficiency = 1/2
     BSM_loss = -10 * np.log10(BSM_efficiency)
 
-    num_data_points = 30 #4
+    num_data_points = 2 #4 #30
     depol_probs = list(np.linspace(0, 0.05, num_data_points))
 
     fidelities = []
@@ -137,7 +138,7 @@ def run_elementary_link_sim(total_link_loss):
     del simulation_results["depolarizing_prob"]
     simulation_results["num_repeaters"] = 0
     simulation_results["depolarizing_probs"] = depol_probs
-    simulation_results["total_loss_in_db"] = total_loss_in_db
+    simulation_results["total_loss_in_db"] = total_link_loss
     simulation_results["fidelities"] = fidelities
     simulation_results["ent_gen_times"] = ent_gen_times
     simulation_results["BSM_efficiency"] = BSM_efficiency
@@ -147,8 +148,8 @@ def run_elementary_link_sim(total_link_loss):
 
 
 if __name__ == "__main__":
-    num_repeaters_list = [0]#[1, 2, 3] # Number of repeaters (Alice and Bob, the end nodes, are counted separately)
-    total_list_loss_list = [20] # Total loss for all links, in dB
+    num_repeaters_list = [0, 1, 2, 3] # Number of repeaters (Alice and Bob, the end nodes, are counted separately)
+    total_list_loss_list = [5, 20] # Total loss for all links, in dB
     for n in num_repeaters_list:
         for t in total_list_loss_list:
             if n == 0:

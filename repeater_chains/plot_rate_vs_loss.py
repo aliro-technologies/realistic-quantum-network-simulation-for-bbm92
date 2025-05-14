@@ -7,8 +7,8 @@ import json
 
 """
 To run: 
-`python plot_rate_vs_loss.py -f [FILE_NAME]`
-where FILE_NAME is the name of the file generated from running `run_repeater_chain_loss_sweep.py`.
+`python plot_rate_vs_loss.py -f [FILE_PATH_NAME]`
+where FILE_PATH_NAME is the name of the file path (without the extension) generated from running `run_repeater_chain_loss_sweep.py`.
 """
 SMALL_FIG = True
 
@@ -16,6 +16,8 @@ def plot_rate_vs_loss_one_repeater(simulation_results_file_path):
     """
     :param simulation_results_file_path: File path for the simulation results contained in a dict.
     """
+    import pdb; pdb.set_trace()
+
     with open(simulation_results_file_path + ".json") as file:
         simulation_results = json.load(file)
 
@@ -97,12 +99,8 @@ if __name__ == "__main__":
     """
     Plot average entanglement generation rate vs loss.
     """
-    main_folder_name = "repeater_chain_results"
-    if not os.path.isdir(main_folder_name):
-        os.mkdir(main_folder_name)
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file-name", help="File name with simulation results")
     args = parser.parse_args()
 
-    plot_rate_vs_loss_one_repeater(simulation_results_file_path=main_folder_name + "/" + args.file_name)
+    plot_rate_vs_loss_one_repeater(simulation_results_file_path=args.file_name)
