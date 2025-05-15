@@ -58,7 +58,7 @@ if __name__ == "__main__":
     main_folder_name = "simulation_results/"
     if not os.path.isdir(main_folder_name):
         os.mkdir(main_folder_name)
-    dir_path = main_folder_path + datetime.utcnow().strftime("%Y-%m-%d")
+    dir_path = main_folder_name + datetime.utcnow().strftime("%Y-%m-%d")
     if not os.path.isdir(dir_path):
         os.mkdir(dir_path)
 
