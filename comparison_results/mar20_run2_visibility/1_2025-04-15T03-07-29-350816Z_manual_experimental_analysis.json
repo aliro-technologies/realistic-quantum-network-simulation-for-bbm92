@@ -1,0 +1,30 @@
+{
+  "data_type": "experiment",
+  "data_file_name": "Mar_20_RUN_2_0P8vTHRESHOLD_BBM92_TIMETAG_STREAM_16HIST_UBENCHPC_12345678_DAHVDAHV_bin_width_1ns_4_36pm",
+  "coincidence_window": 2000.0000000000002,
+  "secure_key_rates": [
+    505.04162532576356
+  ],
+  "secure_key_rate_errors": [
+    16.60123968113756
+  ],
+  "raw_key_rates": [
+    894.3358630601779
+  ],
+  "raw_key_rate_errors": [
+    8.014264144161437
+  ],
+  "qbers": [
+    0.03260258572231589
+  ],
+  "qber_errors": [
+    0.0015914444712972022
+  ],
+  "qbers_label": "QBER",
+  "raw_key_rates_label": "Raw key rate (bps)",
+  "secure_key_rates_label": "Secure key rate (bps)",
+  "x_parameter_name": "visibility",
+  "visibility": [
+    0.94
+  ]
+}

@@ -27,7 +27,7 @@ if __name__ == "__main__":
         os.mkdir(dir_path)
 
     random_seed = 4
-    num_shots = 20  # Number of shots to simulate # 1000
+    num_shots = 1000  # Number of shots to simulate: 1000 for fig in paper, 20 to test
     num_repeaters = (
         1  # Number of repeaters (Alice and Bob, the end nodes, are counted separately)
     )
@@ -50,9 +50,9 @@ if __name__ == "__main__":
 
         # Run simulations and save data to a CSV file
         simulation_parameters = {
-            "random_seed": random_seed,
-            "num_shots": num_shots,
-            "num_repeaters": num_repeaters,
+            "random_seed": random_seed, # Seed to seed the simulation with
+            "num_shots": num_shots, # Number of shots in the simulation
+            "num_repeaters": num_repeaters, # Number of repeaters in the repeater chain
             "elementary_link_loss_in_db": link_loss_in_db
             + BSM_loss,  # Channel loss probability, in dB with added BSM loss, in dB.
             "elementary_link_quantum_delay": elementary_link_quantum_delay,  # Channel delay for qubits, in seconds
@@ -64,7 +64,7 @@ if __name__ == "__main__":
             "meas_delay": 0,  # Measurement delay, in seconds
             "bsm_delay": 0,  # Delay for BSM application, in seconds
             "depolarizing_prob": 0,  # Depolarizing probability per qubit
-            "file_name": file_path,
+            "file_name": file_path, # File path name
         }
 
         fidelity_set, ent_gen_set = run_repeater_chain(**simulation_parameters)

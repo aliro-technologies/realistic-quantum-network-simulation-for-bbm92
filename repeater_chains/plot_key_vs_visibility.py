@@ -7,7 +7,8 @@ import json
 """
 To run:
 `python plot_key_vs_visibility.py -f [FOLDER_PATH_NAME]`
-where FOLDER_PATH_NAME is the path of the folder containing simulations generated from running `run_repeater_chain_visibility_sweep.py`.
+where FOLDER_PATH_NAME is the path of the folder containing simulations generated from
+running `run_repeater_chain_visibility_sweep.py`.
 """
 SMALL_FIG = True
 
@@ -111,7 +112,6 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
         )
 
         color = colors((num_repeaters) + (int(total_loss_in_db / 5) - 1) * 4)
-        print((num_repeaters) + (int(total_loss_in_db / 5) - 1) * 4)
 
         elementary_pair_fidelities = (
             1 + (-(3 / 2) + (3 / 4) * depolarizing_probs) * depolarizing_probs
@@ -182,9 +182,9 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
         fontsize=7.5,
         loc="upper center",
         bbox_to_anchor=(0.5, 1.0),
-        ncol=3,
+        ncol=2,
     )
-    plt.subplots_adjust(top=0.80)
+    plt.subplots_adjust(top=0.76)
     axs.set_xlabel("Elementary link Werner state fidelity")
     plt.yscale("log")
     plt.ylim(bottom=1e-4)

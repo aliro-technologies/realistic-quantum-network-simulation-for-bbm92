@@ -15,10 +15,6 @@ def plot_rate_vs_loss_one_repeater(simulation_results_file_path):
     """
     :param simulation_results_file_path: File path for the simulation results contained in a dict.
     """
-    import pdb
-
-    pdb.set_trace()
-
     with open(simulation_results_file_path + ".json") as file:
         simulation_results = json.load(file)
 
