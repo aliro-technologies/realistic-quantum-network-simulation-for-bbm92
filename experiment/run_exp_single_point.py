@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     data_folder_name = "timetagged_data/"
     plot_folder_name = "experiment_analysis_results/"
-    data_file_name = datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S-%fZ")
+    data_file_name = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S-%fZ")
 
     # Create folders
     if not os.path.isdir(data_folder_name):
