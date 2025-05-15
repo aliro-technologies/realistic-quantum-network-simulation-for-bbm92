@@ -6,19 +6,18 @@
 # protected by intellectual property laws and treaties. Unauthorized reproduction, use,
 # distribution, or disclosure of the Software or any part thereof, in any form, is strictly
 # prohibited.
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
 import argparse
-from datetime import datetime
 import os
 import json
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
 
 """
 Make a plot which will compare key rate, secure key rate, or qber from the numerical
 simulations, the aqnsim simulations, and the experimental results.
 
-To run: 
+To run:
 `python make_comparison_plot.py -f [FOLDER_NAME] -y [Y_PARAMETER_NAME]`
 where FOLDER_NAME is the name of the folder containing
 json files with numerical results, aqnsim results, and experimental results,
@@ -27,6 +26,7 @@ Y_PARAMETER is the name of the parameter to plot on the y axis (should be either
 """
 matplotlib.rcParams.update({"font.size": 16})
 large_exp = False
+
 
 def plot_comparison(results_folder_path: str, y_parameter_name: str):
     """
@@ -38,8 +38,9 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
     """
     # Get list of json files
     file_name_list = [
-        f for f in os.listdir(results_folder_path)
-        if os.path.isfile(os.path.join(results_folder_path, f)) and f.endswith('.json')
+        f
+        for f in os.listdir(results_folder_path)
+        if os.path.isfile(os.path.join(results_folder_path, f)) and f.endswith(".json")
     ]
 
     file_name_list = sorted(file_name_list)
@@ -51,9 +52,6 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
             results = json.load(file)
         x_parameter_name = results.get("x_parameter_name")
 
-        x_parameter_results = results.get(x_parameter_name)
-        y_parameter_results = results.get(y_parameter_name)
-        y_parameter_error_results = results.get(y_parameter_error_name)
         data_type = results.get("data_type")
 
         if data_type == "aqnsim":
@@ -76,7 +74,7 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
     else:
         fig, axs = plt.subplots(1, figsize=(5.5, 3.75))
 
-    colors = plt.cm.get_cmap("Set1")
+    colors = plt.colormaps["Set1"]
     colors = [colors(0), colors(1), colors(8)]
 
     if y_parameter_name == "qbers":
@@ -98,10 +96,15 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
             markersize=5,
             label="Experiment",
             linewidth=1,
-            linestyle=''
+            linestyle="",
         )
-    if x_parameter_name in ["detector_dead_time", "dark_count_rate", "source_pair_rate", "coincidence_window"]:
-        axs.set_xscale('log')
+    if x_parameter_name in [
+        "detector_dead_time",
+        "dark_count_rate",
+        "source_pair_rate",
+        "coincidence_window",
+    ]:
+        axs.set_xscale("log")
 
     p2 = axs.plot(
         numerics_x_data,
@@ -124,7 +127,7 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
         color=colors[2],
         label="AQNSim",
         linewidth=1,
-        linestyle=''
+        linestyle="",
     )
     if large_exp:
         p1 = axs.errorbar(
@@ -136,7 +139,7 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
             markersize=5,
             label="Experiment",
             linewidth=4,
-            linestyle=''
+            linestyle="",
         )
         legend_font_size = 14
     else:

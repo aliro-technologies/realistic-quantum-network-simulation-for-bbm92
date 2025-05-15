@@ -6,13 +6,12 @@
 # protected by intellectual property laws and treaties. Unauthorized reproduction, use,
 # distribution, or disclosure of the Software or any part thereof, in any form, is strictly
 # prohibited.
+import argparse
+import os
+import json
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import argparse
-from datetime import datetime
-import os
-import json
 
 """
 Make a plot which will plot the relative error between key rate, secure key rate, or qber from the numerical
@@ -28,6 +27,7 @@ Y_PARAMETER is the name of the parameter to plot on the y axis (should be either
 matplotlib.rcParams.update({"font.size": 20})
 large_exp = False
 
+
 def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
     """
     Plot comparison of simulations and experiment.
@@ -38,8 +38,10 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
     """
     # Get list of json files
     file_name_list = [
-        f for f in os.listdir(simulation_results_folder_path)
-        if os.path.isfile(os.path.join(simulation_results_folder_path, f)) and f.endswith('.json')
+        f
+        for f in os.listdir(simulation_results_folder_path)
+        if os.path.isfile(os.path.join(simulation_results_folder_path, f))
+        and f.endswith(".json")
     ]
     file_name_list = sorted(file_name_list)
     y_parameter_error_name = y_parameter_name[:-1] + "_errors"
@@ -49,10 +51,6 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
         with open(simulation_results_folder_path + "/" + file_name) as file:
             results = json.load(file)
         x_parameter_name = results.get("x_parameter_name")
-
-        x_parameter_results = results.get(x_parameter_name)
-        y_parameter_results = results.get(y_parameter_name)
-        y_parameter_error_results = results.get(y_parameter_error_name)
         data_type = results.get("data_type")
 
         if data_type == "aqnsim":
@@ -75,9 +73,6 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
     else:
         fig, axs = plt.subplots(1, figsize=(5.5, 3.75))
 
-    colors = plt.cm.get_cmap("Set1")
-    colors = [colors(0), colors(1), colors(8)]
-
     if y_parameter_name == "qbers":
         aqnsim_y_data = np.array(aqnsim_y_data)
         aqnsim_y_data[aqnsim_y_data == 0] = np.nan
@@ -85,21 +80,37 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
             experiment_y_data = np.array(experiment_y_data)
             experiment_y_data[experiment_y_data == 0] = np.nan
 
-    relative_difference_aqnsim_exp = ((experiment_y_data - aqnsim_y_data)/experiment_y_data)
-    delta_difference_aqnsim_exp = np.sqrt((aqnsim_y_error)**2 + (experiment_y_error)**2)
-    exp_aqnsim_y_error = relative_difference_aqnsim_exp * np.sqrt((delta_difference_aqnsim_exp/(experiment_y_data - aqnsim_y_data))**2 + (experiment_y_error/experiment_y_data)**2)
+    relative_difference_aqnsim_exp = (
+        experiment_y_data - aqnsim_y_data
+    ) / experiment_y_data
+    delta_difference_aqnsim_exp = np.sqrt(
+        (aqnsim_y_error) ** 2 + (experiment_y_error) ** 2
+    )
+    exp_aqnsim_y_error = relative_difference_aqnsim_exp * np.sqrt(
+        (delta_difference_aqnsim_exp / (experiment_y_data - aqnsim_y_data)) ** 2
+        + (experiment_y_error / experiment_y_data) ** 2
+    )
 
-    relative_difference_theory_exp = ((experiment_y_data - numerics_y_data)/experiment_y_data)
-    exp_theory_y_error = relative_difference_theory_exp * np.sqrt((experiment_y_error/(experiment_y_data - numerics_y_data))**2 + (experiment_y_error/experiment_y_data)**2)
+    relative_difference_theory_exp = (
+        experiment_y_data - numerics_y_data
+    ) / experiment_y_data
+    exp_theory_y_error = relative_difference_theory_exp * np.sqrt(
+        (experiment_y_error / (experiment_y_data - numerics_y_data)) ** 2
+        + (experiment_y_error / experiment_y_data) ** 2
+    )
 
-    x_start = 1e-10 # In picoseconds
+    x_start = 1e-10  # In picoseconds
     experiment_x_data_trunc = experiment_x_data[experiment_x_data > x_start]
-    relative_difference_aqnsim_exp_trunc = relative_difference_aqnsim_exp[experiment_x_data > x_start]
-    relative_difference_theory_exp_trunc = relative_difference_theory_exp[experiment_x_data > x_start]
+    relative_difference_aqnsim_exp_trunc = relative_difference_aqnsim_exp[
+        experiment_x_data > x_start
+    ]
+    relative_difference_theory_exp_trunc = relative_difference_theory_exp[
+        experiment_x_data > x_start
+    ]
     exp_aqnsim_y_error_trunc = exp_aqnsim_y_error[experiment_x_data > x_start]
     exp_theory_y_error_trunc = exp_theory_y_error[experiment_x_data > x_start]
 
-    plt.axhline(y=0, color='black', linestyle='dotted')
+    plt.axhline(y=0, color="black", linestyle="dotted")
 
     p1 = axs.errorbar(
         experiment_x_data_trunc,
@@ -110,7 +121,7 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
         markersize=5,
         label="(Exp-AQNSim)/Exp",
         linewidth=2,
-        linestyle=''
+        linestyle="",
     )
     p1 = axs.errorbar(
         experiment_x_data_trunc,
@@ -121,13 +132,12 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
         markersize=5,
         label="(Exp-Theory)/Exp",
         linewidth=1,
-        linestyle=''
+        linestyle="",
     )
-    axs.set_xscale('log')
+    axs.set_xscale("log")
 
     legend_font_size = 14
     x_parameter_label = results.get("x_parameter_label")
-    y_parameter_label = results.get(y_parameter_label_name + " relative error")
 
     axs.tick_params(axis="both", which="both", direction="in", top=True, right=True)
     axs.legend(fontsize=legend_font_size, loc="best", frameon=False)

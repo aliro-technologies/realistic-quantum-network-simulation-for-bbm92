@@ -1,6 +1,4 @@
 {
-  "key_size": 256,
-  "prometheus": false,
   "channel_length": 1,
   "channel_delay": 4.903392199412835e-09,
   "link_loss_in_db_a": 12,
