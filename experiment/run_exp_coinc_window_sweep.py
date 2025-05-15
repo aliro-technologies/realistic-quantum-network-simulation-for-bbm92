@@ -1,16 +1,17 @@
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
 import argparse
 import os
-
 from datetime import datetime
 import json
+
+import numpy as np
+from scipy.optimize import curve_fit
+import matplotlib
+import matplotlib.pyplot as plt
+
 from analyze_data import analyze_data
 
 """
-To run: 
+To run:
 `python experiment/run_exp_coinc_window_sweep.py -f [FILE_NAME] -dca [DARK_COUNTS_A] -dcb [DARK_COUNTS_B]`
 where FILE_NAME is the name of the csv file (without the .csv extension)
 containing Swabian data. Average dark counts per second are needed to get an accurate estimate of the source brightness.
@@ -21,9 +22,12 @@ Example:
 python experiment/run_exp_coinc_window_sweep.py -f Mar_20_RUN_1_0P8vTHRESHOLD_BBM92_TIMETAG_STREAM_16HIST_UBENCHPC_12345678_DAHVDAHV_bin_width_1ns_4_35pm -dca 500 -dcb 1800
 """
 
-DEFAULT_DARK_COUNTS = 1000 # Set default dark count estimate in case dark counts are not supplied
-APPROX_DELAY = 15000 # Set the approximate delay, in picoseconds
+DEFAULT_DARK_COUNTS = (
+    1000  # Set default dark count estimate in case dark counts are not supplied
+)
+APPROX_DELAY = 15000  # Set the approximate delay, in picoseconds
 matplotlib.rcParams.update({"font.size": 12})
+
 
 def run_sweep(
     coincidence_windows, simulation_results_folder_path, plot_folder_name, file_name
@@ -57,10 +61,10 @@ def run_sweep(
             singles_rate_A,
             singles_rate_B,
         ) = analyze_data(
-            simulation_results_folder_path,
-            plot_folder_name,
-            file_name,
-            coincidence_window,
+            simulation_results_folder_path=simulation_results_folder_path,
+            plot_folder_name=plot_folder_name,
+            file_name=file_name,
+            coincidence_window=coincidence_window,
             approx_delay=APPROX_DELAY,
         )
         qbers.append(qber)
@@ -80,7 +84,7 @@ def run_sweep(
         secure_key_rates,
         secure_key_rate_errors,
         singles_rates_A,
-        singles_rates_B
+        singles_rates_B,
     )
 
 
@@ -97,10 +101,10 @@ def plot_and_fit_source_brightness(
     """
     Plot and fit the source internal brightness from the singles rates and coincidence rates, for different
     coincidence windows. Coincidence to accidental ratio, CAR, = B * total_loss_A * total_loss_B * t_cc /
-    (B * total_loss_A * t_cc * B * total_loss_B * t_cc) = C_r(t_cc) / (S_A * S_B * t_cc) = 1 / (B * t_cc). 
+    (B * total_loss_A * t_cc * B * total_loss_B * t_cc) = C_r(t_cc) / (S_A * S_B * t_cc) = 1 / (B * t_cc).
     where B is the internal source brightness, total_loss_A is the fractional total loss on the link from the
-    source to Alice, total_loss_B is the fractional total loss on the link from the source to Bob, t_cc is 
-    the coincidence window (in seconds), C_r(t_cc) is the coincidence rate, which is a function of t_cc, 
+    source to Alice, total_loss_B is the fractional total loss on the link from the source to Bob, t_cc is
+    the coincidence window (in seconds), C_r(t_cc) is the coincidence rate, which is a function of t_cc,
     S_A is the singles rate on Alice, and S_B is the singles rate on Bob.
 
     This is also equation A1 in Neumann PRA 104, 022406 (2021).
@@ -120,16 +124,26 @@ def plot_and_fit_source_brightness(
     coincidence_rates = np.array(raw_key_rates) * 2
 
     # Find source internal brightness as S_A * S_B / C_R
-    true_singles_rates_A = np.array(singles_rates_A) - (np.ones(len(singles_rates_A)) * dark_count_rate_A)
-    true_singles_rates_B = np.array(singles_rates_B) - (np.ones(len(singles_rates_B)) * dark_count_rate_B)
-    brightnesses = true_singles_rates_A * true_singles_rates_B / np.array(coincidence_rates)
+    true_singles_rates_A = np.array(singles_rates_A) - (
+        np.ones(len(singles_rates_A)) * dark_count_rate_A
+    )
+    true_singles_rates_B = np.array(singles_rates_B) - (
+        np.ones(len(singles_rates_B)) * dark_count_rate_B
+    )
+    brightnesses = (
+        true_singles_rates_A * true_singles_rates_B / np.array(coincidence_rates)
+    )
 
     ### MANUALLY ADJUST LIMITS TO FIT LINE TO IF FIT FAILS
     lower_limit_coinc_window = 3e-9
     upper_limit_coinc_window = 20e-9
 
-    lower_limit_index = (np.abs(coincidence_windows - lower_limit_coinc_window)).argmin()
-    upper_limit_index = (np.abs(coincidence_windows - upper_limit_coinc_window)).argmin()
+    lower_limit_index = (
+        np.abs(coincidence_windows - lower_limit_coinc_window)
+    ).argmin()
+    upper_limit_index = (
+        np.abs(coincidence_windows - upper_limit_coinc_window)
+    ).argmin()
 
     coincidence_windows_trunc = coincidence_windows[lower_limit_index:upper_limit_index]
     brightnesses_trunc = brightnesses[lower_limit_index:upper_limit_index]
@@ -140,7 +154,9 @@ def plot_and_fit_source_brightness(
 
     # Fit the data to a horizontal line
     A_estimate = 1.56e6
-    popt, pcov = curve_fit(horizontal_line, coincidence_windows_trunc, brightnesses_trunc, p0=[A_estimate])
+    popt, pcov = curve_fit(
+        horizontal_line, coincidence_windows_trunc, brightnesses_trunc, p0=[A_estimate]
+    )
     A_fit = popt
     errs = np.sqrt(np.diag(pcov))
     A_err = errs
@@ -153,11 +169,13 @@ def plot_and_fit_source_brightness(
         coincidence_windows,
         brightnesses,
         color=colors(0),
-        label=f"Estimated source brightness",
+        label="Estimated source brightness",
         linewidth=2,
     )
 
-    fit_coinc_windows = np.linspace(coincidence_windows_trunc[0], coincidence_windows_trunc[-1], 500)
+    fit_coinc_windows = np.linspace(
+        coincidence_windows_trunc[0], coincidence_windows_trunc[-1], 500
+    )
     p2 = axs.errorbar(
         fit_coinc_windows,
         np.ones(len(fit_coinc_windows)) * A_fit,
@@ -179,7 +197,9 @@ def plot_and_fit_source_brightness(
         f"{plot_folder_name}{file_name}_internal_source_brightness_final.png",
         dpi=300,
     )
-    print(f"Estimated source brightness\n$S_A = {singles_rates_A[0]:.2e}$ cps \n$S_B = {singles_rates_B[0]:.2e}$ cps")
+    print(
+        f"Estimated source brightness\n$S_A = {singles_rates_A[0]:.2e}$ cps \n$S_B = {singles_rates_B[0]:.2e}$ cps"
+    )
 
 
 def plot_qbers_and_raw_key_rates(
@@ -216,7 +236,7 @@ def plot_qbers_and_raw_key_rates(
         capthick=1,
         color=colors(0),
         label="Raw key rate",
-        linestyle='',
+        linestyle="",
     )
 
     ax2 = axs.twinx()
@@ -228,7 +248,7 @@ def plot_qbers_and_raw_key_rates(
         capthick=1,
         color=colors(1),
         label="QBER",
-        linestyle='',
+        linestyle="",
     )
 
     axs.yaxis.label.set_color(colors(0))
@@ -259,8 +279,14 @@ if __name__ == "__main__":
     # Parse in file name
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file-name", help="File name with simulation results")
-    parser.add_argument("-dca", "--dark-count-a", help="Dark count rate on Alice (all detectors), in cps")
-    parser.add_argument("-dcb", "--dark-count-b", help="Dark count rate on Bob (all detectors), in cps")
+    parser.add_argument(
+        "-dca",
+        "--dark-count-a",
+        help="Dark count rate on Alice (all detectors), in cps",
+    )
+    parser.add_argument(
+        "-dcb", "--dark-count-b", help="Dark count rate on Bob (all detectors), in cps"
+    )
 
     args = parser.parse_args()
     if args.dark_count_a:
@@ -292,14 +318,25 @@ if __name__ == "__main__":
         coincidence_window * 1e-12 for coincidence_window in coincidence_windows
     ]
 
-    qbers, qber_errors, raw_key_rates, raw_key_rate_errors, secure_key_rates, secure_key_rate_errors, singles_rates_A, singles_rates_B= run_sweep(
+    (
+        qbers,
+        qber_errors,
+        raw_key_rates,
+        raw_key_rate_errors,
+        secure_key_rates,
+        secure_key_rate_errors,
+        singles_rates_A,
+        singles_rates_B,
+    ) = run_sweep(
         coincidence_windows, data_folder_name, plot_folder_name, args.file_name
     )
     # Create a dict with results
     experiment_analysis = {}
     experiment_analysis["data_type"] = "experiment"
     experiment_analysis["data_file_name"] = args.file_name
-    experiment_analysis["coincidence_window"] = [cw*1e-12 for cw in coincidence_windows]
+    experiment_analysis["coincidence_window"] = [
+        cw * 1e-12 for cw in coincidence_windows
+    ]
     experiment_analysis["secure_key_rates"] = secure_key_rates
     experiment_analysis["secure_key_rate_errors"] = secure_key_rate_errors
     experiment_analysis["raw_key_rates"] = raw_key_rates
@@ -317,9 +354,10 @@ if __name__ == "__main__":
     experiment_analysis["x_parameter_label"] = "Coincidence window (s)"
 
     # Save dict with parameters and sim results to JSON file
-    with open(plot_folder_name + data_file_name + "_experimental_analysis" + ".json", "w") as file:
+    with open(
+        plot_folder_name + data_file_name + "_experimental_analysis" + ".json", "w"
+    ) as file:
         file.write(json.dumps(experiment_analysis, indent=2))
-
 
     # Plot and fit the source brightness.
     plot_and_fit_source_brightness(

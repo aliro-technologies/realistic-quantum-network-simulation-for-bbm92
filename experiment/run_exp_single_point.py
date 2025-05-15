@@ -1,15 +1,11 @@
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
 import argparse
 import os
-
+import json
+import datetime
 from analyze_data import analyze_data
-from utilities import write_json, datetime_now_string
 
 """
-To run: 
+To run:
 `python experiment/run_exp_single_point.py -f [FILE_NAME] -pn [PARAMETER_NAME] -pv [PARAMETER_VALUE]`
 where FILE_NAME is the name of the csv file (without the .csv extension)
 containing Swabian data.
@@ -19,7 +15,8 @@ python experiment/run_exp_single_point.py -f Mar_20_RUN_2_0P8vTHRESHOLD_BBM92_TI
 
 """
 
-APPROX_DELAY = 15000 # Set the approximate delay, in picoseconds
+APPROX_DELAY = 15000  # Set the approximate delay, in picoseconds
+
 
 def run_analyze_data(
     coincidence_window, simulation_results_folder_path, plot_folder_name, file_name
@@ -75,8 +72,9 @@ def run_analyze_data(
         secure_key_rates,
         secure_key_rate_errors,
         singles_rates_A,
-        singles_rates_B
+        singles_rates_B,
     )
+
 
 if __name__ == "__main__":
     """
@@ -85,8 +83,12 @@ if __name__ == "__main__":
     # Parse in file name
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file-name", help="File name with simulation results")
-    parser.add_argument("-pn", "--param-name", help="Name of parameter to manually input")
-    parser.add_argument("-pv", "--param-value", help="Value(s) of parameter manually input")
+    parser.add_argument(
+        "-pn", "--param-name", help="Name of parameter to manually input"
+    )
+    parser.add_argument(
+        "-pv", "--param-value", help="Value(s) of parameter manually input"
+    )
 
     args = parser.parse_args()
     param_value = float(args.param_value)
@@ -104,9 +106,18 @@ if __name__ == "__main__":
         os.mkdir(plot_folder_name)
 
     # Two nanoseconds (the coincidence window), in picoseconds
-    coincidence_window = 2e-9*1e12
+    coincidence_window = 2e-9 * 1e12
 
-    qbers, qber_errors, raw_key_rates, raw_key_rate_errors, secure_key_rates, secure_key_rate_errors, singles_rates_A, singles_rates_B= run_analyze_data(
+    (
+        qbers,
+        qber_errors,
+        raw_key_rates,
+        raw_key_rate_errors,
+        secure_key_rates,
+        secure_key_rate_errors,
+        singles_rates_A,
+        singles_rates_B,
+    ) = run_analyze_data(
         coincidence_window, data_folder_name, plot_folder_name, args.file_name
     )
     # Create a dict with results
@@ -126,7 +137,9 @@ if __name__ == "__main__":
     experiment_analysis["secure_key_rates_label"] = "Secure key rate (bps)"
     experiment_analysis["x_parameter_name"] = param_name
     experiment_analysis[param_name] = [param_value]
-    
+
     # Save dict with parameters and sim results to JSON file
-    with open(plot_folder_name + data_file_name + "_manual_input_analysis" + ".json", "w") as file:
+    with open(
+        plot_folder_name + data_file_name + "_manual_input_analysis" + ".json", "w"
+    ) as file:
         file.write(json.dumps(experiment_analysis, indent=2))

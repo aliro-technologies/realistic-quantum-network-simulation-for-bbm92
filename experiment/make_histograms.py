@@ -1,16 +1,13 @@
-import numpy as np
 import csv
-import matplotlib.pyplot as plt
 import json
-from scipy.optimize import curve_fit
 import argparse
 import os
-import re
-
-from get_secure_key_rate_error import get_secure_key_rate_error
+import numpy as np
+from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
 
 """
-To run: 
+To run:
 `python experiment/make_histograms.py -f [FILE_NAME]`
 where FILE_NAME is the name of the csv file (without the .csv extension)
 containing Swabian data.
@@ -24,7 +21,6 @@ def plot_histograms(
     simulation_results_folder_path,
     plot_folder_name,
     file_name,
-    coincidence_window,
     approx_delay=0,
     save_plot=False,
     same_basis_detectors=True,
@@ -40,7 +36,6 @@ def plot_histograms(
     :param simulation_results_folder_path: Folder path name with data.
     :param plot_folder_name: Folder path name to save plots.
     :param file_name: Data file name.
-    :param coincidence_window: The time bin size, in picoseconds. Warning: do not exceed 1000 ps.
     :param approx_delay: The delay to add to Bob's detectors, in picoseconds.
         Should be 10000 for runs 3, 4 and 15000 for runs 5, 7, 8.
     :param save_plot: If true, save plots.
@@ -62,31 +57,10 @@ def plot_histograms(
     # Get acquisition time and convert to seconds
     acq_time_in_seconds = float(data_dict["AcqTime"]) * 1e-12
 
-    # Find the detector ordering in the saved title
-    match = re.search(r"12345678_([^_]{8})_", file_name)
-    if match:
-        detector_map_string = match.group(1)
-        if detector_map_string == "HVDAHVDA":
-            alice_detector_to_bit = {1: 1, 2: 0, 3: 0, 4: 1}
-            bob_detector_to_bit = {5: 0, 6: 1, 7: 0, 8: 1}
-            basis0 = "HV"
-            basis1 = "AD"
-        elif detector_map_string == "DAHVDAHV":
-            alice_detector_to_bit = {1: 0, 2: 1, 3: 1, 4: 0}
-            bob_detector_to_bit = {5: 0, 6: 1, 7: 0, 8: 1}
-            basis0 = "AD"
-            basis1 = "HV"
-        else:
-            raise ValueError(
-                "Invalid title string does not contain basis information in correct format."
-            )
-    else:
-        raise ValueError("Invalid title string does not contain basis information.")
-
     # In the case where the data time length does not match the recorded Swabian acq time due to
     # file size issues, find the real aquisition time.
     for j in range(1, 9):
-        channel_json = data_dict[f'Ch{j}_stream']
+        channel_json = data_dict[f"Ch{j}_stream"]
         timestamps = json.loads(channel_json)
         if j == 1:
             min_timestamp = timestamps[0]
@@ -94,7 +68,7 @@ def plot_histograms(
         else:
             min_timestamp = min(min_timestamp, timestamps[0])
             max_timestamp = max(max_timestamp, timestamps[-1])
-    total_time_in_seconds = (max_timestamp - min_timestamp)*1e-12
+    total_time_in_seconds = (max_timestamp - min_timestamp) * 1e-12
     acq_time_in_seconds = total_time_in_seconds
 
     if save_plot:
@@ -169,7 +143,9 @@ def plot_histograms(
                 * bin_size_in_picoseconds
             )
             rounded_timestamp_diff_index = int(
-                rounded_timestamp_diff * half_array_length / half_array_size_in_picoseconds
+                rounded_timestamp_diff
+                * half_array_length
+                / half_array_size_in_picoseconds
             )
             rounded_timestamp_diff_index += int(
                 half_array_size_in_picoseconds / bin_size_in_picoseconds
@@ -214,8 +190,8 @@ def plot_histograms(
             ax.plot(
                 fine_grained_delay_data,
                 gaussian(fine_grained_delay_data, A_fit, mu_fit, sigma_fit),
-                label=f"$\mu={mu_fit:.0f} \pm {mu_err:.0f}$\n"
-                f"$\sigma={sigma_fit:.0f} \pm {sigma_err:.0f}$",
+                label=f"$\\mu={mu_fit:.0f} \\pm {mu_err:.0f}$\n"
+                f"$\\sigma={sigma_fit:.0f} \\pm {sigma_err:.0f}$",
             )
             ax.legend(prop={"size": 8})
 
@@ -227,9 +203,8 @@ def plot_histograms(
         file_name += "_not_same_basis"
     if save_plot:
         plt.tight_layout()
-        plt.savefig(
-            plot_folder_name + file_name + "_histograms.png", dpi=300
-        )
+        plt.savefig(plot_folder_name + file_name + "_histograms.png", dpi=300)
+
 
 if __name__ == "__main__":
     """
@@ -254,7 +229,6 @@ if __name__ == "__main__":
         simulation_results_folder_path=data_folder_name,
         plot_folder_name=plot_folder_name,
         file_name=args.file_name,
-        coincidence_window=1000,
         approx_delay=15000,
         save_plot=True,
         same_basis_detectors=True,
