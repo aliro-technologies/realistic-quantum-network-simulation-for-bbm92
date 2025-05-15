@@ -7,8 +7,8 @@
 # distribution, or disclosure of the Software or any part thereof, in any form, is strictly
 # prohibited.
 from typing import List, Union, Dict
-import numpy as np
 import random
+import numpy as np
 
 import aqnsim
 from aqnsim.quantum_simulator import quantum_operations as ops
@@ -510,7 +510,8 @@ class RepeaterProtocol(aqnsim.NodeProtocol):
             elementary_ent2_generated = False
             while True:
                 if not elementary_ent1_generated and not elementary_ent2_generated:
-                    # Trigger the EEG subprotocols, thereby starting the entanglement generation attempt on either side
+                    # Trigger the EEG subprotocols, thereby starting the entanglement
+                    # generation attempt on either side
                     self.entgen_proto1.trigger()
                     self.entgen_proto2.trigger()
 
@@ -909,7 +910,6 @@ def run_repeater_chain(
     meas_delay: Union[int, float],
     bsm_delay: Union[int, float],
     depolarizing_prob: Union[int, float],
-    file_name: str,
 ):
     """
     Main run method.
@@ -928,7 +928,6 @@ def run_repeater_chain(
     :param meas_delay: The delay (in seconds) on measurement operations.
     :param bsm_delay: The delay (in seconds) on the Bell state measurement.
     :param depolarizing_prob: The probability of depolarizing for each qubit.
-    :param file_name: The name of the file and path to save to.
     """
     random.seed(random_seed)
     np.random.seed(random_seed)
@@ -937,7 +936,7 @@ def run_repeater_chain(
     entanglement_generation_times = []
     state_fidelity = None
 
-    for run in range(num_shots):
+    for _ in range(num_shots):
         # The simulation context
         sim_context = aqnsim.SimulationContext(
             log_to_file=False, logging_level=0, defer_measurements=False

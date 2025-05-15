@@ -277,12 +277,12 @@ def run_elementary_link_simulation(
 
             # Setup network and protocols, and run sim until the given time
             network = setup_network(
-                sim_context,
-                elementary_link_loss_in_db,
-                elementary_link_quantum_delay,
-                fiber1_length,
-                fiber2_length,
-                depolarizing_prob,
+                sim_context=sim_context,
+                elementary_link_loss_in_db=elementary_link_loss_in_db,
+                elementary_link_quantum_delay=elementary_link_quantum_delay,
+                fiber1_length=fiber1_length,
+                fiber2_length=fiber2_length,
+                depolarizing_prob=depolarizing_prob,
             )
             [alice, bob] = network.nodes
             alice_protocol, bob_protocol = setup_protocols(sim_context, alice, bob)

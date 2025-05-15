@@ -1,10 +1,11 @@
 from datetime import datetime
-import numpy as np
 import copy
 
 import uuid
 import os
 import json
+import numpy as np
+
 from repeater_chain import run_repeater_chain
 from elementary_link import run_elementary_link_simulation
 
@@ -33,19 +34,19 @@ def run_n_repeater_chain_sims(num_repeaters, total_link_loss):
     file_path = dir_path + "/" + file_name_string
 
     random_seed = 1
-    num_shots = 10  # 1000 # Number of shots to simulate #10
+    num_shots = 1000  # 1000 for simulation in paper, 10 to test
     elementary_link_quantum_delay = 1
     elementary_link_classical_delay = 0  # Can modify this from 0 as needed
     BSM_efficiency = 1 / 2
     BSM_loss = -10 * np.log10(BSM_efficiency)
 
-    num_data_points = 4  # 30 #4
+    num_data_points = 30  # 30 for simulation in figure, 4 to test
     depol_probs = list(np.linspace(0, 0.05, num_data_points))
 
     fidelities = []
     ent_gen_times = []
 
-    for i, depol_prob in enumerate(depol_probs):
+    for depol_prob in depol_probs:
         # Run simulation with passed in simulation parameters
         # Run many simulations and find the average simulated time and ending fidelity.
 
@@ -53,9 +54,9 @@ def run_n_repeater_chain_sims(num_repeaters, total_link_loss):
 
         # Run simulations and save data to a CSV file
         simulation_parameters = {
-            "random_seed": random_seed, # Seed to seed the simulation
-            "num_shots": num_shots, # Number of shots in the simulation
-            "num_repeaters": num_repeaters, # Number of repeaters in the repeater chain
+            "random_seed": random_seed,  # Seed to seed the simulation
+            "num_shots": num_shots,  # Number of shots in the simulation
+            "num_repeaters": num_repeaters,  # Number of repeaters in the repeater chain
             "elementary_link_loss_in_db": link_loss_in_db
             + BSM_loss,  # Channel loss probability, in dB with added BSM loss, in dB
             "elementary_link_quantum_delay": elementary_link_quantum_delay,  # Channel delay for qubits, in seconds
@@ -67,7 +68,6 @@ def run_n_repeater_chain_sims(num_repeaters, total_link_loss):
             "meas_delay": 0,  # Measurement delay, in seconds
             "bsm_delay": 0,  # Delay for BSM application, in seconds
             "depolarizing_prob": depol_prob,  # Depolarizing probability per qubit
-            "file_name": file_path, # File path name
         }
 
         fidelity_set, ent_gen_set = run_repeater_chain(**simulation_parameters)
@@ -106,18 +106,18 @@ def run_elementary_link_sim(total_link_loss):
     file_path = dir_path + "/" + file_name_string
 
     random_seed = 1
-    num_shots = 3  # Number of shots to simulate #10 #1000
+    num_shots = 1000  # 1000 for simulation in paper, 3 to test
     elementary_link_quantum_delay = 1
     BSM_efficiency = 1 / 2
     BSM_loss = -10 * np.log10(BSM_efficiency)
 
-    num_data_points = 2  # 4 #30
+    num_data_points = 30  # 30 for simulation in paper, 4 to test
     depol_probs = list(np.linspace(0, 0.05, num_data_points))
 
     fidelities = []
     ent_gen_times = []
 
-    for i, depol_prob in enumerate(depol_probs):
+    for depol_prob in depol_probs:
         link_loss_in_db = total_link_loss
 
         # Run simulations and save data to a CSV file

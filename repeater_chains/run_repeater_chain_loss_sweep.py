@@ -1,10 +1,10 @@
 from datetime import datetime
-import numpy as np
 import copy
 
 import uuid
 import os
 import json
+import numpy as np
 from repeater_chain import run_repeater_chain
 
 
@@ -50,9 +50,9 @@ if __name__ == "__main__":
 
         # Run simulations and save data to a CSV file
         simulation_parameters = {
-            "random_seed": random_seed, # Seed to seed the simulation with
-            "num_shots": num_shots, # Number of shots in the simulation
-            "num_repeaters": num_repeaters, # Number of repeaters in the repeater chain
+            "random_seed": random_seed,  # Seed to seed the simulation with
+            "num_shots": num_shots,  # Number of shots in the simulation
+            "num_repeaters": num_repeaters,  # Number of repeaters in the repeater chain
             "elementary_link_loss_in_db": link_loss_in_db
             + BSM_loss,  # Channel loss probability, in dB with added BSM loss, in dB.
             "elementary_link_quantum_delay": elementary_link_quantum_delay,  # Channel delay for qubits, in seconds
@@ -64,7 +64,6 @@ if __name__ == "__main__":
             "meas_delay": 0,  # Measurement delay, in seconds
             "bsm_delay": 0,  # Delay for BSM application, in seconds
             "depolarizing_prob": 0,  # Depolarizing probability per qubit
-            "file_name": file_path, # File path name
         }
 
         fidelity_set, ent_gen_set = run_repeater_chain(**simulation_parameters)

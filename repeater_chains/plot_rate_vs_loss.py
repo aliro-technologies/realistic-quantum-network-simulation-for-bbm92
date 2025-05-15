@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import argparse
 import json
+import numpy as np
+import matplotlib.pyplot as plt
 
 """
 To run:
