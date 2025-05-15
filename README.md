@@ -1,4 +1,4 @@
-# realistic-quantum-network-simulation
+# realistic-quantum-network-simulation-for-bbm92-key-distribution
 This repo contains code and data to reproduce results in the paper "Realistic quantum network simulation for BBM92 key distribution". This paper uses the Aliro Simulator to simulate BBM92 key distribution, reproducing experimental results and verifying analytical theory. 
 
 
