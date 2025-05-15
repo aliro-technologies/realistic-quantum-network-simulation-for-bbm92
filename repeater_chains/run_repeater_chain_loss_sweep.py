@@ -1,3 +1,11 @@
+# Copyright © 2025 Aliro Technologies, Inc. All Rights Reserved.
+# ALIRO QUANTUM is a registered trademark of Aliro Technologies, Inc.
+
+# This software, including its source code and accompanying documentation
+# (collectively, "Software"), is confidential and proprietary to Aliro Technologies, Inc. and is
+# protected by intellectual property laws and treaties. Unauthorized reproduction, use,
+# distribution, or disclosure of the Software or any part thereof, in any form, is strictly
+# prohibited.
 from datetime import datetime
 import copy
 
