@@ -4,8 +4,8 @@
 python comparison/make_comparison_plot.py -f comparison_results/mar20_run2_coinc_window -y qbers
 python comparison/make_comparison_plot.py -f comparison_results/mar20_run2_coinc_window -y raw_key_rates
 
-python comparison/make_error_plot.py -f comparison_results/mar20_run2_coinc_window -y qbers
-python comparison/make_error_plot.py -f comparison_results/mar20_run2_coinc_window -y raw_key_rates
+python comparison/make_error_plot.py -f comparison_results/mar20_run2_coinc_window_errors -y qbers
+python comparison/make_error_plot.py -f comparison_results/mar20_run2_coinc_window_errors -y raw_key_rates
 
 python comparison/make_comparison_plot.py -f comparison_results/mar20_run2_dark_counts -y secure_key_rates
 python comparison/make_comparison_plot.py -f comparison_results/mar20_run2_deadtimes -y secure_key_rates
