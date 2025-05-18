@@ -101,7 +101,7 @@ if __name__ == "__main__":
             "detector_maximum_efficiency": DETECTOR_MAXIMUM_EFFICIENCY,
             "minimum_time_resolution": MINIMUM_TIME_RESOLUTION,
             "num_shots": num_shots,
-            "random_seed": 1,
+            "random_seed": 0,
         }
         (
             secure_key_rate,

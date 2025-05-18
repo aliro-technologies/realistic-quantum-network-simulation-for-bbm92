@@ -94,8 +94,8 @@ if __name__ == "__main__":
             "detector_freq_width": DETECTOR_FREQ_WIDTH,
             "detector_maximum_efficiency": DETECTOR_MAXIMUM_EFFICIENCY,
             "minimum_time_resolution": MINIMUM_TIME_RESOLUTION,
-            "num_shots": 300000,
-            "random_seed": 9,
+            "num_shots": 6000000,
+            "random_seed": 0,
         }
         (
             secure_key_rate,

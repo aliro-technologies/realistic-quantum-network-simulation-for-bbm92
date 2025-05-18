@@ -13,4 +13,3 @@ python comparison/make_comparison_plot.py -f comparison_results/mar20_run2_jitte
 python comparison/make_comparison_plot.py -f comparison_results/mar20_run2_loss -y secure_key_rates
 python comparison/make_comparison_plot.py -f comparison_results/mar20_run2_source_brightness -y secure_key_rates
 python comparison/make_comparison_plot.py -f comparison_results/mar20_run2_visibility -y secure_key_rates
-

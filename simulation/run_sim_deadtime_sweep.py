@@ -52,8 +52,6 @@ DETECTOR_FREQ_WIDTH = SPEED_OF_LIGHT / 700e-9 - SPEED_OF_LIGHT / 900e-9
 DETECTOR_MAXIMUM_EFFICIENCY = 0.60
 MINIMUM_TIME_RESOLUTION = 2 * NANOSECOND  # Time resolution of the FPGA
 
-RANDOM_SEED = 0
-
 if __name__ == "__main__":
     # Create folder and file name
     # Set up directory to save results
@@ -93,8 +91,8 @@ if __name__ == "__main__":
             "detector_freq_width": DETECTOR_FREQ_WIDTH,
             "detector_maximum_efficiency": DETECTOR_MAXIMUM_EFFICIENCY,
             "minimum_time_resolution": MINIMUM_TIME_RESOLUTION,
-            "num_shots": 3000000,
-            "random_seed": RANDOM_SEED,
+            "num_shots": 6000000,
+            "random_seed": 0,
         }
         (
             secure_key_rate,
