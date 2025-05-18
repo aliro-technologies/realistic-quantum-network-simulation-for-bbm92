@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 from analyze_data import analyze_data
 
 """
-To run:
+Usage:
 `python experiment/run_exp_coinc_window_sweep.py -f [FILE_NAME] -dca [DARK_COUNTS_A] -dcb [DARK_COUNTS_B]`
 where FILE_NAME is the name of the csv file (without the .csv extension)
 containing Swabian data. Average dark counts per second are needed to get an accurate estimate of the source brightness.

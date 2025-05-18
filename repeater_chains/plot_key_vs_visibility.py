@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 """
-To run:
+Usage:
 `python plot_key_vs_visibility.py -f [FOLDER_PATH_NAME]`
 where FOLDER_PATH_NAME is the path of the folder containing simulations generated from
 running `run_repeater_chain_visibility_sweep.py`.

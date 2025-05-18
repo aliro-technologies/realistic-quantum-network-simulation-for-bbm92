@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 Make a plot which will compare key rate, secure key rate, or qber from the numerical
 simulations, the aqnsim simulations, and the experimental results.
 
-To run:
+Usage:
 `python make_comparison_plot.py -f [FOLDER_NAME] -y [Y_PARAMETER_NAME]`
 where FOLDER_NAME is the name of the folder containing
 json files with numerical results, aqnsim results, and experimental results,

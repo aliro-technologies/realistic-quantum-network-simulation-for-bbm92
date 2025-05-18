@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 """
-To run:
+Usage:
 `python plot_rate_vs_loss.py -f [FILE_PATH_NAME]`
 where FILE_PATH_NAME is the name of the file path (without the extension) generated from running `run_repeater_chain_loss_sweep.py`.
 """

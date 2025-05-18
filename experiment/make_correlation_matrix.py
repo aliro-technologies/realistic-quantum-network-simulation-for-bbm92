@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 """
-To run:
+Usage:
 `python experiment/make_correlation_matrix.py -f [FILE_NAME]`
 where FILE_NAME is the name of the csv file (without the .csv extension)
 containing Swabian data.

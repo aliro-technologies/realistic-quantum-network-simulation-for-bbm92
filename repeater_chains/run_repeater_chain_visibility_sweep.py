@@ -19,7 +19,7 @@ from elementary_link import run_elementary_link_simulation
 
 
 """
-To run:
+Usage:
 `python run_repeater_chain_visibility_sweep.py`
 """
 

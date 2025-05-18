@@ -13,7 +13,7 @@ import datetime
 from analyze_data import analyze_data
 
 """
-To run:
+Usage:
 `python experiment/run_exp_single_point.py -f [FILE_NAME] -pn [PARAMETER_NAME] -pv [PARAMETER_VALUE]`
 where FILE_NAME is the name of the csv file (without the .csv extension)
 containing Swabian data.

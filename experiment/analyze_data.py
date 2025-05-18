@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 from get_secure_key_rate_error import get_secure_key_rate_error
 
 """
-To run:
+Usage:
 `python experiment/analyze_data.py -f [FILE_NAME]`
 where FILE_NAME is the name of the csv file (without the .csv extension)
 containing Swabian data.

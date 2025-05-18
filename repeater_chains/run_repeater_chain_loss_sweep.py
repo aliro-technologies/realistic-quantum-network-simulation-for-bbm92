@@ -17,7 +17,7 @@ from repeater_chain import run_repeater_chain
 
 
 """
-To run:
+Usage:
 `python run_repeater_chain_loss_sweep.py`
 """
 

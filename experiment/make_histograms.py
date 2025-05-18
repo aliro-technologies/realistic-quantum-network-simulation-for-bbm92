@@ -15,7 +15,7 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
 """
-To run:
+Usage:
 `python experiment/make_histograms.py -f [FILE_NAME]`
 where FILE_NAME is the name of the csv file (without the .csv extension)
 containing Swabian data.

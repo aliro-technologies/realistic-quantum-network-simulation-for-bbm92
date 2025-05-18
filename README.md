@@ -4,11 +4,11 @@ This repo contains code and data to reproduce results in the paper "Realistic qu
 
 ## Environment Setup
 
-The Aliro Simulator (aqnsim) simulations in this repo require the Aliro Simulator package, which is not currently open source. For more information and to learn more about how to access the Aliro Simulator, please visit our [`website`](https://www.aliroquantum.com/products/alirosimulator).
+Some of the code in this repo applies Aliro Simulator and requires the `aqnsim` Python package to run. For more information about Aliro Simulator or to gain access, please visit our [`website`](https://www.aliroquantum.com/products/alirosimulator).
 
-All simulations in this repo can be run in the development environment provided by the Aliro Simulator. All Aliro Simulator simulations in this repo are compatible with Aliro Simulator v0.12.0.
+All simulations in this repo can be run in the `aqnsim-dev` conda environment provided by the Aliro Simulator. All Aliro Simulator simulations in this repo are compatible with Aliro Simulator v0.12.0 (`aqnsim==0.12.0`).
 
-To run the theory and experimental analysis scripts (`run_theory.sh`, `run_exp_analysis.sh`, and `run_make_comparison_plot.sh`) in this repo without access to the Aliro Simulator, we have included a yml file in this repo. First, install [`conda`](https://conda.io/projects/conda/en/latest/index.html).
+We have included a yml file in this repo to run the theory and experimental analysis scripts (`run_theory.sh`, `run_exp_analysis.sh`, and `run_make_comparison_plot.sh`) in this repo without having access to the Aliro Simulator. First, install [`conda`](https://conda.io/projects/conda/en/latest/index.html).
 
 To create the environment from the yml file, navigate to the root project directory and run the command:
 
