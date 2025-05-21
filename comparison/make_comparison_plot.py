@@ -25,7 +25,7 @@ Y_PARAMETER is the name of the parameter to plot on the y axis (should be either
 "raw_key_rates" or "secure_key_rates"), e.g. "link_loss_in_db", "minimum_time_resolution", etc.
 """
 matplotlib.rcParams.update({"font.size": 16})
-large_exp = False
+LARGE_EXP = False
 
 
 def plot_comparison(results_folder_path: str, y_parameter_name: str):
@@ -86,7 +86,7 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
 
     experiment_y_lower_error = np.fmax(np.array(experiment_y_error), 0)
     experiment_y_upper_error = np.array(experiment_y_error)
-    if not large_exp:
+    if not LARGE_EXP:
         p1 = axs.errorbar(
             experiment_x_data,
             experiment_y_data,
@@ -129,7 +129,7 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
         linewidth=1,
         linestyle="",
     )
-    if large_exp:
+    if LARGE_EXP:
         p1 = axs.errorbar(
             experiment_x_data,
             experiment_y_data,
