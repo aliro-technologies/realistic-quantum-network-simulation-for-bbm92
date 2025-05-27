@@ -11,6 +11,8 @@ import json
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.special import comb
+
 
 """
 Usage:
@@ -19,7 +21,7 @@ where FOLDER_PATH_NAME is the path of the folder containing simulations generate
 running `run_repeater_chain_visibility_sweep.py`.
 """
 SMALL_FIG = True
-
+PLOT_LEGEND = False
 
 def calc_secure_key_rates(fidelities, time_means, time_errs=None):
     """
@@ -78,7 +80,7 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
 
     fig, axs = plt.subplots(1)
 
-    if SMALL_FIG:
+    if PLOT_LEGEND:
         fig.set_size_inches(6, 6)
 
     colors = plt.cm.get_cmap("tab20b")
@@ -154,18 +156,23 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
 
         # Calculate analytical rates
         nesting_level = np.log2(num_repeaters + 1)
-        if num_repeaters == 1:
-            # Analytical expression for special case of ONE repeater
-            theory_rate = (3 - 2 * P0) * elementary_link_quantum_delay / ((2 - P0) * P0)
-        else:
-            # Approximation for average time to entanglement for n repeaters
-            theory_rate = (
-                (3 / 2) ** nesting_level * elementary_link_quantum_delay * 1 / P0
+        if num_repeaters == 0:
+            theory_times = (
+                elementary_link_quantum_delay * 1 / P0
             )
+
+        else:
+            # Exact expression for average time to entanglement for n repeaters
+            j_array = np.arange(1, 2**nesting_level + 1, 1)
+            prefactor_terms = comb(2**nesting_level, j_array)
+            second_terms = (-1)**(j_array + 1) / (1 - (1 - P0)**j_array)
+            Zn = np.sum(prefactor_terms * second_terms)
+            theory_times = elementary_link_quantum_delay * Zn
+
 
         if num_repeaters > 1:
             theory_label = (
-                f"Est. theory: r = {num_repeaters}, $\\beta$ = {total_loss_in_db} dB"
+                f"Theory: r = {num_repeaters}, $\\beta$ = {total_loss_in_db} dB"
             )
         else:
             theory_label = (
@@ -173,7 +180,7 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
             )
 
         theory_secure_key_rates, _ = calc_secure_key_rates(
-            theory_fidelities, theory_rate
+            theory_fidelities, theory_times
         )
         axs.plot(
             elementary_pair_fidelities_theory,
@@ -185,15 +192,16 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
         )
 
     axs.grid(True, linestyle="--", linewidth=0.5)
-    fig.legend(
-        frameon=False,
-        fontsize=7.5,
-        loc="upper center",
-        bbox_to_anchor=(0.5, 1.0),
-        ncol=2,
-    )
-    plt.subplots_adjust(top=0.76)
-    axs.set_xlabel("Elementary link Werner state fidelity")
+    if PLOT_LEGEND:
+        fig.legend(
+            frameon=False,
+            fontsize=7.5,
+            loc="upper center",
+            bbox_to_anchor=(0.5, 1.0),
+            ncol=2,
+        )
+        plt.subplots_adjust(top=0.76)
+    axs.set_xlabel("Elementary link Werner state fidelity ($F_i$)")
     plt.yscale("log")
     plt.ylim(bottom=1e-4)
 
