@@ -24,8 +24,6 @@ json files with numerical results, aqnsim results, and experimental results,
 Y_PARAMETER is the name of the parameter to plot on the y axis (should be either "qbers",
 "raw_key_rates" or "secure_key_rates"), e.g. "link_loss_in_db", "minimum_time_resolution", etc.
 """
-matplotlib.rcParams.update({"font.size": 20})
-large_exp = False
 
 
 def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
@@ -36,6 +34,8 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
     :param y_parameter_name: The name of the parameter to plot on the y-axis, e.g. either "qbers",
         "raw_key_rates" or "secure_key_rates".
     """
+    matplotlib.rcParams.update({"font.size": 20})
+
     # Get list of json files
     file_name_list = [
         f
@@ -71,7 +71,8 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
     if x_parameter_name == "coincidence_window":
         fig, axs = plt.subplots(1, figsize=(10.5, 2.5))
     else:
-        fig, axs = plt.subplots(1, figsize=(5.5, 3.75))
+        #        fig, axs = plt.subplots(1, figsize=(5.5, 3.75))
+        fig, axs = plt.subplots(1, figsize=(5.5, 3.85))
 
     if y_parameter_name == "qbers":
         aqnsim_y_data = np.array(aqnsim_y_data)
@@ -133,6 +134,15 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
         label="(Exp-Theory)/Exp",
         linewidth=1,
         linestyle="",
+    )
+    first_step = experiment_x_data_trunc[1] - experiment_x_data_trunc[0]
+    last_step = experiment_x_data_trunc[-1] - experiment_x_data_trunc[-2]
+
+    plt.xlim(
+        [
+            experiment_x_data_trunc[0] - first_step,
+            experiment_x_data_trunc[-1] + last_step,
+        ]
     )
     axs.set_xscale("log")
 

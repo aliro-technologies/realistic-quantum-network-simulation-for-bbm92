@@ -24,8 +24,6 @@ json files with numerical results, aqnsim results, and experimental results,
 Y_PARAMETER is the name of the parameter to plot on the y axis (should be either "qbers",
 "raw_key_rates" or "secure_key_rates"), e.g. "link_loss_in_db", "minimum_time_resolution", etc.
 """
-matplotlib.rcParams.update({"font.size": 16})
-LARGE_EXP = False
 
 
 def plot_comparison(results_folder_path: str, y_parameter_name: str):
@@ -36,6 +34,8 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
     :param y_parameter_name: The name of the parameter to plot on the y-axis, e.g. either "qbers",
         "raw_key_rates" or "secure_key_rates".
     """
+    matplotlib.rcParams.update({"font.size": 16})
+
     # Get list of json files
     file_name_list = [
         f
@@ -70,7 +70,7 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
 
     # Plot results
     if x_parameter_name == "coincidence_window":
-        fig, axs = plt.subplots(1, figsize=(14.5, 3.75))
+        fig, axs = plt.subplots(1, figsize=(14.75, 3.85))
     else:
         fig, axs = plt.subplots(1, figsize=(5.5, 3.75))
 
@@ -86,7 +86,7 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
 
     experiment_y_lower_error = np.fmax(np.array(experiment_y_error), 0)
     experiment_y_upper_error = np.array(experiment_y_error)
-    if not LARGE_EXP:
+    if x_parameter_name == "coincidence_window":
         p1 = axs.errorbar(
             experiment_x_data,
             experiment_y_data,
@@ -118,18 +118,19 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
     aqnsim_y_lower_err = np.fmax(np.array(aqnsim_y_error), 0)
     aqnsim_y_upper_err = np.array(aqnsim_y_error)
 
-    p3 = axs.errorbar(
-        aqnsim_x_data,
-        aqnsim_y_data,
-        [aqnsim_y_lower_err, aqnsim_y_upper_err],
-        capsize=2,
-        markersize=5,
-        color=colors[2],
-        label="AQNSim",
-        linewidth=1,
-        linestyle="",
-    )
-    if LARGE_EXP:
+    if x_parameter_name != "coincidence_window":
+        p3 = axs.errorbar(
+            aqnsim_x_data,
+            aqnsim_y_data,
+            [aqnsim_y_lower_err, aqnsim_y_upper_err],
+            capsize=4,
+            markersize=5,
+            color=colors[2],
+            label="AQNSim",
+            linewidth=4,
+            linestyle="",
+        )
+
         p1 = axs.errorbar(
             experiment_x_data,
             experiment_y_data,
@@ -141,9 +142,25 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
             linewidth=4,
             linestyle="",
         )
-        legend_font_size = 14
     else:
-        legend_font_size = 10
+        matplotlib.rcParams.update({"font.size": 16})
+        p3 = axs.errorbar(
+            aqnsim_x_data,
+            aqnsim_y_data,
+            [aqnsim_y_lower_err, aqnsim_y_upper_err],
+            capsize=2,
+            markersize=5,
+            color=colors[2],
+            label="AQNSim",
+            linewidth=1,
+            linestyle="",
+        )
+        first_step = experiment_x_data[1] - experiment_x_data[0]
+        last_step = experiment_x_data[-1] - experiment_x_data[-2]
+
+        plt.xlim([experiment_x_data[0] - first_step, experiment_x_data[-1] + last_step])
+
+    legend_font_size = 14
     x_parameter_label = results.get("x_parameter_label")
     y_parameter_label = results.get(y_parameter_label_name)
     axs.tick_params(axis="both", which="both", direction="in", top=True, right=True)
@@ -158,7 +175,7 @@ def plot_comparison(results_folder_path: str, y_parameter_name: str):
 
     plt.savefig(
         f"{results_folder_path}/{x_parameter_name}_{y_parameter_name}.png",
-        dpi=300,
+        dpi=500,
     )
     plt.close()
 
