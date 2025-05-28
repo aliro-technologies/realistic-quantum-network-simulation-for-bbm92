@@ -9,6 +9,7 @@
 import os
 import json
 import argparse
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.special import comb
@@ -75,7 +76,7 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
 
     # Plot results
     if SMALL_FIG:
-        font_size = 12
+        font_size = 14
         plt.rcParams.update({"font.size": font_size})
 
     fig, axs = plt.subplots(1)
@@ -83,7 +84,8 @@ def plot_rate_vs_loss_n_repeaters_with_theory(simulation_results_folder_path):
     if PLOT_LEGEND:
         fig.set_size_inches(6, 6)
 
-    colors = plt.cm.get_cmap("tab20b")
+    colors = matplotlib.colormaps["tab20b"]
+
 
     for sim_file_name in sorted_sim_file_names:
         with open(simulation_results_folder_path + sim_file_name) as file:

@@ -9,6 +9,7 @@
 import argparse
 import json
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 
 """
@@ -53,7 +54,7 @@ def plot_rate_vs_loss_one_repeater(simulation_results_file_path):
 
     # Plot results
     if SMALL_FIG:
-        font_size = 12
+        font_size = 14
         plt.rcParams.update({"font.size": font_size})
 
     fig, axs = plt.subplots(1)
@@ -65,7 +66,7 @@ def plot_rate_vs_loss_one_repeater(simulation_results_file_path):
         fig.suptitle(
             f"Entanglement generation in a {num_repeaters}-node repeater chain, {num_shots} shots"
         )
-    colors = plt.cm.get_cmap("Set1")
+    colors = matplotlib.colormaps["Set1"]
 
     sim_time_means = np.mean(ent_gen_times, axis=1)
     sim_time_errs = np.std(ent_gen_times, axis=1) / np.sqrt(
