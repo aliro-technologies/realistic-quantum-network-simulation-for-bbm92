@@ -71,7 +71,6 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
     if x_parameter_name == "coincidence_window":
         fig, axs = plt.subplots(1, figsize=(10.5, 2.5))
     else:
-        #        fig, axs = plt.subplots(1, figsize=(5.5, 3.75))
         fig, axs = plt.subplots(1, figsize=(5.5, 3.85))
 
     if y_parameter_name == "qbers":

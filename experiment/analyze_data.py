@@ -65,9 +65,6 @@ def analyze_data(
         for row in reader:
             data_dict = row
 
-    # Get acquisition time and convert to seconds
-    acq_time_in_seconds = float(data_dict["AcqTime"]) * 1e-12
-
     # Find the detector ordering in the saved title
     match = re.search(r"12345678_([^_]{8})_", file_name)
     if match:
@@ -118,8 +115,7 @@ def analyze_data(
 
     detector_st_devs = []
 
-    # In the case where the data time length does not match the recorded Swabian acq time due to
-    # file size issues, find the real aquisition time.
+    # Find the acquisition time
     for j in range(1, 9):
         channel_json = data_dict[f"Ch{j}_stream"]
         timestamps = json.loads(channel_json)
