@@ -1,0 +1,9 @@
+name: realistic-qn-env
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - ipykernel
+  - pip
+  - pip:
+    - -r requirements.txt
