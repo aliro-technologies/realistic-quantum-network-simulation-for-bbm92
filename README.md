@@ -38,9 +38,9 @@ Raw experimental data is saved in the folder `timetagged_data`.
 
 
 ## Parameter estimation for each data set
-The table below summarizes the parameters estimated from experiment and used for theory and simulation. DCA and DCB are the summed total dark counts per second at Alice and Bob's detectors. The jitter (detection resolution) is calculated from the experimental data as the average standard deviation of the fit of Gaussian fits to histograms of coincidence counts between Alice and Bob that result in valid key bits, using the `experiment/make_histograms.py` script. The total decibel loss on Alice (dbA), total decibel loss on Bob (dbB), QBER, and pair rate are calculated from the experimental data using the `experiment/run_exp_coinc_window_sweep.py` script.
+The table below summarizes the parameters estimated from experiment and used for theory and simulation. DCA and DCB are the summed total dark counts per second at Alice and Bob's detectors. The jitter (detection resolution) is calculated from the experimental data as the average standard deviation of the fit of Gaussian fits to histograms of coincidence counts between Alice and Bob that result in valid key bits, using the `experiment/make_histograms.py` script. The total decibel loss on Alice (LossA), total decibel loss on Bob (LossB), QBER, and pair rate are calculated from the experimental data using the `experiment/run_exp_coinc_window_sweep.py` script.
 
-| Run         | dbA  | dbB  | Pair Rate | QBER | Jitter | DCA   | DCB   |
+| Run         | LossA (dB) | LossB (dB) | Pair Rate (cps)| QBER | Jitter (ps) | DCA (cps)  | DCB (cps)  |
 |-------------|------|------|-----------|------|--------|-------|-------|
 | mar20,run1  | 12.0 | 12.0 | 1.49e6    | 0.03 | 690    | 500   | 1800  |
 | mar20,run2  | 12.0 | 12.0 | 1.50e6    | 0.03 | 690    | 500   | 1800  |
