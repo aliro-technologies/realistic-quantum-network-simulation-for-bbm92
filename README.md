@@ -1,5 +1,5 @@
 # realistic-quantum-network-simulation-for-bbm92
-This repo contains code and data to reproduce results in the paper "Realistic quantum network simulation for BBM92 key distribution". This paper uses the Aliro Quantum Network Simulation (AQNSim) python package to simulate BBM92 key distribution, reproducing experimental results and verifying analytical theory. 
+This repo contains code and data to reproduce results in the paper "Realistic quantum network simulation for experimental BBM92 key distribution". This paper uses the Aliro Quantum Network Simulation (AQNSim) python package to simulate BBM92 key distribution, reproducing experimental results and verifying analytical theory. 
 
 
 ## Environment Setup
