@@ -35,3 +35,16 @@ The simulations and plots for Figures 4 and 5 (simulation and theory showing ent
 To create Figures 2 and 3 from the theory, AQNSim, and experimental analysis files, run the bash script `run_make_comparison_plot.sh`. When this script is run, the reference images in `comparison_results` directory will be overwritten.
 
 Raw experimental data is saved in the folder `timetagged_data`.
+
+
+## Parameter estimation for each data set
+The table below summarizes the parameters estimated from experiment and used for theory and simulation. DCA and DCB are the summed total dark counts per second at Alice and Bob's detectors. The jitter is calculated from the experimental data using the `experiment/make_histograms.py` script. The total decibel loss on Alice (dbA), total decibel loss on Bob (dbB), QBER, and pair rate are calculated from the experimental data using the `run_exp_coinc_window_sweep.py` script.
+
+| Run         | dbA  | dbB  | Pair Rate | QBER | Jitter | DCA   | DCB   |
+|-------------|------|------|-----------|------|--------|-------|-------|
+| mar20,run1  | 12.0 | 12.0 | 1.49e6    | 0.03 | 690    | 500   | 1800  |
+| mar20,run2  | 12.0 | 12.0 | 1.50e6    | 0.03 | 690    | 500   | 1800  |
+| mar20,run3  | 11.8 | 11.9 | 1.40e6    | 0.03 | 700    | 7750  | 7000  |
+| mar20,run4  | 11.8 | 11.9 | 1.40e6    | 0.03 | 690    | 7750  | 7000  |
+| mar20,run5  | 11.8 | 11.9 | 1.40e6    | 0.03 | 700    | 19200 | 14950 |
+| mar20,run6  | 11.8 | 11.9 | 1.41e6    | 0.03 | 690    | 19200 | 14950 |

@@ -13,23 +13,6 @@ import json
 import numpy as np
 from calc_rate_and_qber import calc_rate_and_qber
 
-"""
-Estimated parameters from experimental runs:
-run: dbA, dbB, pair rate, qber, jitter, est. DCA, est. DCB
-run3: 11.4, 15.1, 1.35e6, 0.04, 690, 1000, 1000
-run4: 11.4, 15.1, 1.34e6, 0.04, 650, 1000, 1000
-run5: 11.6, 12.2, 1.25e6, 0.035, 650, 1000, 1000
-run7: 11.7, 12.3, 1.28e6, 0.03, 670, 1000, 1000
-run8: 11.7, 12.3, 1.32e6, 0.03, 660, 1000, 1000
-
-run: dbA, dbB, pair rate, qber, jitter, DCA, DCB
-mar20,run1: 12.0, 12.0, 1.49e6, 0.03, 690, 500, 1800
-mar20,run2: 12.0, 12.0, 1.50e6, 0.03, 690, 500, 1800
-mar20,run3: 11.8, 11.9, 1.40e6, 0.03, 700, 7750, 7000
-mar20,run4: 11.8, 11.9, 1.40e6, 0.03, 690, 7750, 7000
-mar20,run5: 11.8, 11.9, 1.40e6, 0.03, 700, 19200, 14950
-mar20,run6: 11.8, 11.9, 1.41e6, 0.03, 690, 19200, 14950
-"""
 FRACTIONAL_LOSS_A = 10 ** (-12 / 10)
 FRACTIONAL_LOSS_B = 10 ** (-12 / 10)
 DETECTOR_EFFICIENCY = 0.6
