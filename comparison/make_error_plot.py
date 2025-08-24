@@ -81,25 +81,25 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
             experiment_y_data[experiment_y_data == 0] = np.nan
 
     relative_difference_aqnsim_exp = (
-        experiment_y_data - aqnsim_y_data
+        aqnsim_y_data - experiment_y_data
     ) / experiment_y_data
     delta_difference_aqnsim_exp = np.sqrt(
         (aqnsim_y_error) ** 2 + (experiment_y_error) ** 2
     )
     exp_aqnsim_y_error = relative_difference_aqnsim_exp * np.sqrt(
-        (delta_difference_aqnsim_exp / (experiment_y_data - aqnsim_y_data)) ** 2
+        (delta_difference_aqnsim_exp / (aqnsim_y_data - experiment_y_data)) ** 2
         + (experiment_y_error / experiment_y_data) ** 2
     )
 
     relative_difference_theory_exp = (
-        experiment_y_data - numerics_y_data
+        numerics_y_data - experiment_y_data
     ) / experiment_y_data
     exp_theory_y_error = relative_difference_theory_exp * np.sqrt(
-        (experiment_y_error / (experiment_y_data - numerics_y_data)) ** 2
+        (experiment_y_error / (numerics_y_data - experiment_y_data)) ** 2
         + (experiment_y_error / experiment_y_data) ** 2
     )
 
-    x_start = 1e-10  # In picoseconds
+    x_start = 1e-10  # In seconds
     experiment_x_data_trunc = experiment_x_data[experiment_x_data > x_start]
     relative_difference_aqnsim_exp_trunc = relative_difference_aqnsim_exp[
         experiment_x_data > x_start
@@ -119,7 +119,7 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
         color="#ff8701",
         capsize=2,
         markersize=5,
-        label="(Exp-AQNSim)/Exp",
+        label="(AQNSim-Exp)/Exp",
         linewidth=2,
         linestyle="",
     )
@@ -130,7 +130,7 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
         color="#80c32d",
         capsize=2,
         markersize=5,
-        label="(Exp-Theory)/Exp",
+        label="(Theory-Exp)/Exp",
         linewidth=1,
         linestyle="",
     )
