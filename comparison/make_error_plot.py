@@ -110,8 +110,20 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
     exp_aqnsim_y_error_trunc = exp_aqnsim_y_error[experiment_x_data > x_start]
     exp_theory_y_error_trunc = exp_theory_y_error[experiment_x_data > x_start]
 
-    plt.axhline(y=0, color="black", linestyle="dotted")
+    ## Find the mean squared errors for the region of interest
+    aqnsim_exp_diff = aqnsim_y_data - experiment_y_data
+    theory_exp_diff = numerics_y_data - experiment_y_data
+    aqnsim_exp_diff_trunc = aqnsim_exp_diff[experiment_x_data > x_start]
+    theory_exp_diff_trunc = theory_exp_diff[experiment_x_data > x_start]
 
+    rmse_aqnsim_exp = np.sqrt(np.mean(aqnsim_exp_diff_trunc**2))
+    rmse_theory_exp = np.sqrt(np.mean(theory_exp_diff_trunc**2))
+
+    unit_text = "bps" if y_parameter_name == "raw_key_rates" else ""
+    text_y_pos = -0.08 if y_parameter_name == "raw_key_rates" else 0.25
+
+    plt.axhline(y=0, color="black", linestyle="dotted")
+    plt.text(8e-9, text_y_pos, f"AQNSim/Exp RMSE: {rmse_aqnsim_exp:.1e} {unit_text}\nTheory/Exp RMSE: {rmse_theory_exp:.1e} {unit_text}", fontsize=12, fontstyle='italic', color="black")
     p1 = axs.errorbar(
         experiment_x_data_trunc,
         relative_difference_aqnsim_exp_trunc,
