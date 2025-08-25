@@ -120,14 +120,14 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
     rmse_theory_exp = np.sqrt(np.mean(theory_exp_diff_trunc**2))
 
     unit_text = "bps" if y_parameter_name == "raw_key_rates" else ""
-    text_y_pos = -0.08 if y_parameter_name == "raw_key_rates" else 0.25
+    text_y_pos = -0.09 if y_parameter_name == "raw_key_rates" else 0.25
 
     plt.axhline(y=0, color="black", linestyle="dotted")
     plt.text(
-        8e-9,
+        5e-9,
         text_y_pos,
         f"AQNSim/Exp RMSE: {rmse_aqnsim_exp:.1e} {unit_text}\nTheory/Exp RMSE: {rmse_theory_exp:.1e} {unit_text}",
-        fontsize=12,
+        fontsize=14,
         fontstyle="italic",
         color="black",
     )
