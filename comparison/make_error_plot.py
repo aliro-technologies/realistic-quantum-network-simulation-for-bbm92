@@ -81,25 +81,25 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
             experiment_y_data[experiment_y_data == 0] = np.nan
 
     relative_difference_aqnsim_exp = (
-        experiment_y_data - aqnsim_y_data
+        aqnsim_y_data - experiment_y_data
     ) / experiment_y_data
     delta_difference_aqnsim_exp = np.sqrt(
         (aqnsim_y_error) ** 2 + (experiment_y_error) ** 2
     )
     exp_aqnsim_y_error = relative_difference_aqnsim_exp * np.sqrt(
-        (delta_difference_aqnsim_exp / (experiment_y_data - aqnsim_y_data)) ** 2
+        (delta_difference_aqnsim_exp / (aqnsim_y_data - experiment_y_data)) ** 2
         + (experiment_y_error / experiment_y_data) ** 2
     )
 
     relative_difference_theory_exp = (
-        experiment_y_data - numerics_y_data
+        numerics_y_data - experiment_y_data
     ) / experiment_y_data
     exp_theory_y_error = relative_difference_theory_exp * np.sqrt(
-        (experiment_y_error / (experiment_y_data - numerics_y_data)) ** 2
+        (experiment_y_error / (numerics_y_data - experiment_y_data)) ** 2
         + (experiment_y_error / experiment_y_data) ** 2
     )
 
-    x_start = 1e-10  # In picoseconds
+    x_start = 1e-10  # In seconds
     experiment_x_data_trunc = experiment_x_data[experiment_x_data > x_start]
     relative_difference_aqnsim_exp_trunc = relative_difference_aqnsim_exp[
         experiment_x_data > x_start
@@ -110,8 +110,27 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
     exp_aqnsim_y_error_trunc = exp_aqnsim_y_error[experiment_x_data > x_start]
     exp_theory_y_error_trunc = exp_theory_y_error[experiment_x_data > x_start]
 
-    plt.axhline(y=0, color="black", linestyle="dotted")
+    # Find the mean squared errors for the region of interest
+    aqnsim_exp_diff = aqnsim_y_data - experiment_y_data
+    theory_exp_diff = numerics_y_data - experiment_y_data
+    aqnsim_exp_diff_trunc = aqnsim_exp_diff[experiment_x_data > x_start]
+    theory_exp_diff_trunc = theory_exp_diff[experiment_x_data > x_start]
 
+    rmse_aqnsim_exp = np.sqrt(np.mean(aqnsim_exp_diff_trunc**2))
+    rmse_theory_exp = np.sqrt(np.mean(theory_exp_diff_trunc**2))
+
+    unit_text = "bps" if y_parameter_name == "raw_key_rates" else ""
+    text_y_pos = -0.09 if y_parameter_name == "raw_key_rates" else 0.25
+
+    plt.axhline(y=0, color="black", linestyle="dotted")
+    plt.text(
+        5e-9,
+        text_y_pos,
+        f"AQNSim/Exp RMSE: {rmse_aqnsim_exp:.1e} {unit_text}\nTheory/Exp RMSE: {rmse_theory_exp:.1e} {unit_text}",
+        fontsize=14,
+        fontstyle="italic",
+        color="black",
+    )
     p1 = axs.errorbar(
         experiment_x_data_trunc,
         relative_difference_aqnsim_exp_trunc,
@@ -119,7 +138,7 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
         color="#ff8701",
         capsize=2,
         markersize=5,
-        label="(Exp-AQNSim)/Exp",
+        label="(AQNSim-Exp)/Exp",
         linewidth=2,
         linestyle="",
     )
@@ -130,7 +149,7 @@ def plot_comparison(simulation_results_folder_path: str, y_parameter_name: str):
         color="#80c32d",
         capsize=2,
         markersize=5,
-        label="(Exp-Theory)/Exp",
+        label="(Theory-Exp)/Exp",
         linewidth=1,
         linestyle="",
     )
