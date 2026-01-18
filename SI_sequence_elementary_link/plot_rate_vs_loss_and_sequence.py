@@ -15,12 +15,14 @@ import matplotlib.pyplot as plt
 """
 Usage:
 `python plot_rate_vs_loss_sequence.py -f [FILE_PATH_NAME]`
-where FILE_PATH_NAME is the name of the file path (without the extension) generated from running `run_two_node_sequence_example.py`.
+where FILE_PATH_NAME is the name of the file path (without the extension) generated from running `run_two_node_sequence_ent_gen.py`.
 """
 
 
 def plot_rate_vs_loss_sequence(sequence_simulation_results_file_path):
     """
+    Plot rate vs loss for SeQUeNCe simulation results for establishing entanglement given 0 repeater nodes.
+
     :param sequence_simulation_results_file_path: File path for the SeQUeNCe simulation results.
     """
     colors = matplotlib.colormaps["Set1"]
@@ -28,7 +30,7 @@ def plot_rate_vs_loss_sequence(sequence_simulation_results_file_path):
     fig, axs = plt.subplots(1)
     fig.set_size_inches(6, 3)
 
-    sim_type = 'SeQUeNCe'
+    sim_type = "SeQUeNCe"
     file_color = colors(2)
 
     with open(sequence_simulation_results_file_path + ".json") as file:
@@ -38,7 +40,9 @@ def plot_rate_vs_loss_sequence(sequence_simulation_results_file_path):
     elementary_link_quantum_delay = simulation_results["elementary_link_quantum_delay"]
 
     if elementary_link_quantum_delay != 1:
-        raise ValueError("Elementary quantum link delay must be 1: enforce normalization to simplify axes labels.")
+        raise ValueError(
+            "Elementary quantum link delay must be 1: enforce normalization to simplify axes labels."
+        )
     if num_repeaters != 0:
         raise ValueError("Number of repeaters must be 0 for this script.")
 
@@ -99,8 +103,14 @@ if __name__ == "__main__":
     Plot average entanglement generation rate vs loss.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--file-name-sequence", help="File name with results for SeQUeNCe simulation")
+    parser.add_argument(
+        "-f",
+        "--file-name-sequence",
+        help="File name with results for SeQUeNCe simulation",
+    )
 
     args = parser.parse_args()
 
-    plot_rate_vs_loss_sequence(sequence_simulation_results_file_path=args.file_name_sequence)
+    plot_rate_vs_loss_sequence(
+        sequence_simulation_results_file_path=args.file_name_sequence
+    )

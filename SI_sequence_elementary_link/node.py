@@ -2,10 +2,9 @@
 Code adapted from: https://github.com/sequence-toolbox/SeQUeNCe/blob/master/sequence/topology/node.py
 """
 
-from bsm import SingleAtomBSM
 from sequence.entanglement_management.generation import EntanglementGenerationB
-from sequence.utils import log
 from sequence.topology.node import Node
+from bsm import SingleAtomBSM
 
 
 class BSMNode(Node):
@@ -47,9 +46,6 @@ class BSMNode(Node):
         if self.encoding_type == "single_atom":
             bsm_args = component_templates.get("SingleAtomBSM", {})
             bsm = SingleAtomBSM(bsm_name, timeline, **bsm_args)
-        elif self.encoding_type == "single_heralded":
-            bsm_args = component_templates.get("SingleHeraldedBSM", {})
-            bsm = SingleHeraldedBSM(bsm_name, timeline, **bsm_args)
         else:
             raise ValueError(f"Encoding type {self.encoding_type} not supported")
 
@@ -60,7 +56,9 @@ class BSMNode(Node):
         bsm.attach(self.eg)
 
     def receive_message(self, src: str, msg: "Message") -> None:
-        # signal to protocol that we've received a message
+        """
+        Signal to protocol that we've received a message
+        """
         for protocol in self.protocols:
             if (
                 protocol.protocol_type == msg.protocol_type

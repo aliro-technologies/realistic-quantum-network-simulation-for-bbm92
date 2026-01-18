@@ -15,12 +15,13 @@ class SingleAtomBSM(BSM):
     Measures incoming photons and manages entanglement of associated memories.
 
     Attributes:
-        name (str): label for BSM instance
-        timeline (Timeline): timeline for simulation
+        name (str): label for BSM instance.
+        timeline (Timeline): timeline for simulation.
         phase_error (float): phase error applied to measurement.
-        detectors (list[Detector]): list of attached photon detection devices
-        resolution (int): maximum time resolution achievable with attached detectors  
+        detectors (list[Detector]): list of attached photon detection devices.
+        resolution (int): maximum time resolution achievable with attached detectors.
     """
+
     _meas_circuit = Circuit(1)
     _meas_circuit.measure(0)
 
@@ -60,55 +61,51 @@ class SingleAtomBSM(BSM):
             key0, key1 = p0.quantum_state, p1.quantum_state
             keys = [key0, key1]
             state0, state1 = qm.get(key0), qm.get(key1)
-            meas0, meas1 = (qm.run_circuit(self._meas_circuit, [key], self.get_generator().random())[key]
-                            for key in keys)
+            meas0, meas1 = (
+                qm.run_circuit(
+                    self._meas_circuit, [key], self.get_generator().random()
+                )[key]
+                for key in keys
+            )
 
             log.logger.debug(self.name + f" measured photons as {meas0}, {meas1}")
 
             if meas0 ^ meas1:  # meas0, meas1 = 1, 0 or 0, 1
-                detector_num = self.get_generator().choice([0, 1])   # randomly select a detector number
+                detector_num = self.get_generator().choice(
+                    [0, 1]
+                )  # randomly select a detector number
                 if len(state0.keys) == 1:
-                    # if we're in stage 1: we set state to psi+/psi- to mark the
-                    # first triggered detector
                     log.logger.info(self.name + " passed stage 1")
                     if detector_num == 0:
                         _set_pure_state(keys, BSM._psi_minus, qm)
                     else:
                         _set_pure_state(keys, BSM._psi_plus, qm)
-                elif len(state0.keys) == 2:
-                    # if we're in stage 2: check if the same detector is triggered
-                    # twice to assign state to psi+ or psi-
-                    log.logger.info(self.name + " passed stage 2")
-                    if _eq_psi_plus(state0, qm.get_active_formalism()) ^ detector_num:
-                        _set_state_with_fidelity(keys, BSM._psi_minus, p0.encoding_type["raw_fidelity"],
-                                                 self.get_generator(), qm)
-                    else:
-                        _set_state_with_fidelity(keys, BSM._psi_plus, p0.encoding_type["raw_fidelity"],
-                                                 self.get_generator(), qm)
                 else:
                     raise NotImplementedError("Unknown state")
 
                 # Changed the line below from the original source code to apply loss from both arms
-                if self.get_generator().random() > p0.loss and self.get_generator().random() > p1.loss:
+                if (
+                    self.get_generator().random() > p0.loss
+                    and self.get_generator().random() > p1.loss
+                ):
                     log.logger.info(f"Triggering detector {detector_num}")
                     # middle BSM node notify two end nodes via EntanglementGenerationB.bsm_update()
                     self.detectors[detector_num].get()
                 else:
-                    log.logger.info(f'{self.name} lost photon p{meas1}')
-
+                    log.logger.info(f"{self.name} lost photon p{meas1}")
 
             else:  # meas0, meas1 = 1, 1 or 0, 0
                 if meas0 and self.get_generator().random() > p0.loss:
                     detector_num = self.get_generator().choice([0, 1])
                     self.detectors[detector_num].get()
                 else:
-                    log.logger.info(f'{self.name} lost photon p0')
+                    log.logger.info(f"{self.name} lost photon p0")
 
                 if meas1 and self.get_generator().random() > p1.loss:
                     detector_num = self.get_generator().choice([0, 1])
                     self.detectors[detector_num].get()
                 else:
-                    log.logger.info(f'{self.name} lost photon p1')
+                    log.logger.info(f"{self.name} lost photon p1")
 
     def trigger(self, detector: Detector, info: dict[str, Any]):
         """See base class.
@@ -123,5 +120,5 @@ class SingleAtomBSM(BSM):
         time = info["time"]
 
         res = detector_num
-        info = {'entity': 'BSM', 'info_type': 'BSM_res', 'res': res, 'time': time}
+        info = {"entity": "BSM", "info_type": "BSM_res", "res": res, "time": time}
         self.notify(info)

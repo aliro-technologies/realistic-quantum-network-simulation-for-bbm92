@@ -2,22 +2,22 @@
 Code adapted from: https://github.com/sequence-toolbox/SeQUeNCe/blob/master/example/demo_for_beginners/two_node_eg.ipynb
 """
 
-from ipywidgets import interact
-from matplotlib import pyplot as plt
-import time
 import json
-import numpy as np
 import uuid
 from datetime import datetime
+
+from matplotlib import pyplot as plt
+import numpy as np
 
 from sequence.kernel.timeline import Timeline
 from sequence.topology.node import QuantumRouter
 from sequence.components.optical_channel import ClassicalChannel, QuantumChannel
 from sequence.resource_management.rule_manager import Rule
-from sequence.entanglement_management.generation import EntanglementGenerationA
 from sequence.constants import SPEED_OF_LIGHT
 
-from node import BSMNode # Modified version of BSMNode with modified BSM for two photons, defined in bsm.py
+from node import (
+    BSMNode,
+)  # Modified version of BSMNode with modified SingleAtomBSM for two photons, defined in bsm.py
 from basic_ent_gen_protocol import SimpleEntGenA
 
 SPEED_OF_LIGHT_M_PER_S = SPEED_OF_LIGHT * 1e12
@@ -142,7 +142,7 @@ def sequence_ent_gen(sim_time, cc_delay, qc_atten, qc_dist, num_attempts):
 
     if VERBOSE:
         plt.plot(data, range(1, len(data) + 1), marker="o")
-        plt.xlabel("Simulation Time (ms)")
+        plt.xlabel("Simulation Time (S)")
         plt.ylabel("Aggregated Number of Entangled Memory")
         plt.show()
 
@@ -175,7 +175,6 @@ def sequence_ent_gen(sim_time, cc_delay, qc_atten, qc_dist, num_attempts):
         plt.xlabel("Memory Number")
         plt.show()
 
-
     minimum_time_between_attempts = (
         qc_dist / 2 / SPEED_OF_LIGHT_M_PER_S
     ) + cc_delay_in_ps * 1e-12
@@ -189,7 +188,6 @@ def sequence_ent_gen(sim_time, cc_delay, qc_atten, qc_dist, num_attempts):
     # Include maximum efficiency of linear optical BSM measurement as 0.5
     BSM_efficiency = 0.5
     P0 = link_efficiency * BSM_efficiency
-
 
     if VERBOSE:
         print(f"Fraction of successful attempts: {len(data)/num_attempts}")
@@ -256,7 +254,13 @@ def main():
     uuid_string = str(uuid.uuid4())
     file_name_string = datetime.utcnow().strftime("%H_%M_%S") + "_" + uuid_string
 
-    with open("SI_sequence_elementary_link/" + file_name_string + "_sequence_SI_sim_results_elementary_link" + ".json", "w") as file:
+    with open(
+        "SI_sequence_elementary_link/"
+        + file_name_string
+        + "_sequence_SI_sim_results_elementary_link"
+        + ".json",
+        "w",
+    ) as file:
         file.write(json.dumps(simulation_results, indent=2))
 
 

@@ -2,7 +2,7 @@
 Code adapted from: https://github.com/sequence-toolbox/SeQUeNCe/blob/master/sequence/entanglement_management/generation/barret_kok.py
 """
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from sequence.entanglement_management.generation.generation_message import (
     EntanglementGenerationMessage,
@@ -14,7 +14,6 @@ from sequence.resource_management.memory_manager import MemoryInfo
 from sequence.constants import BARRET_KOK
 from sequence.entanglement_management.generation.generation_base import (
     EntanglementGenerationA,
-    EntanglementGenerationB,
     QuantumCircuitMixin,
 )
 
@@ -25,7 +24,9 @@ from sequence.utils import log
 import numpy as np
 
 
-@EntanglementGenerationA.register(BARRET_KOK)  # Overwrite default Barret-Kok with SimpleEntGenA
+@EntanglementGenerationA.register(
+    BARRET_KOK
+)  # Overwrite default Barret-Kok with SimpleEntGenA
 class SimpleEntGenA(EntanglementGenerationA, QuantumCircuitMixin):
     """Entanglement generation protocol for quantum router.
 
@@ -96,8 +97,6 @@ class SimpleEntGenA(EntanglementGenerationA, QuantumCircuitMixin):
             and self.bsm_res[0] != -1
             and len(self.memory.get_bds_state()) > 2
         ):
-            self.remote_node_name
-
             # entanglement succeeded, then apply correction
             if self.bsm_res[0] == 0:
                 if not self.primary:
@@ -206,7 +205,7 @@ class SimpleEntGenA(EntanglementGenerationA, QuantumCircuitMixin):
                 self.expected_time + self.owner.cchannels[self.middle].delay + 10
             )  # delay is for sending the BSM_RES to end nodes, 10 is a small gap
 
-            process = Process(self, "update_memory", []) # Update memory should not take time
+            process = Process(self, "update_memory", [])
 
             priority = self.owner.timeline.schedule_counter
             event = Event(future_start_time, process, priority)
@@ -285,5 +284,4 @@ class SimpleEntGenA(EntanglementGenerationA, QuantumCircuitMixin):
     def _entanglement_succeed(self):
         self.memory.entangled_memory["node_id"] = self.remote_node_name
         self.memory.entangled_memory["memo_id"] = self.remote_memo_id
-        #  self.memory.fidelity = self.memory.raw_fidelity
         self.update_resource_manager(self.memory, MemoryInfo.ENTANGLED)
