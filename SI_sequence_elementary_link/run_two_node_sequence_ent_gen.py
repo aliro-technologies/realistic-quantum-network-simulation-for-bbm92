@@ -189,17 +189,16 @@ def sequence_ent_gen(sim_time, cc_delay, qc_atten, qc_dist, num_attempts):
     BSM_efficiency = 0.5
     P0 = link_efficiency * BSM_efficiency
 
-    if VERBOSE:
-        print(f"Fraction of successful attempts: {len(data)/num_attempts}")
-        print(
-            f"Simulation avg time (S): {entangle_time_in_seconds} +/- {np.std(time_between_attempts)/np.sqrt(len(time_between_attempts))}"
-        )
+    print(f"Fraction of successful attempts: {len(data)/num_attempts}")
+    print(
+        f"Simulation avg time (S): {entangle_time_in_seconds} +/- {np.std(time_between_attempts)/np.sqrt(len(time_between_attempts))}"
+    )
 
-        print(f"Expected time (S): {minimum_time_between_attempts/P0}")
+    print(f"Expected time (S): {minimum_time_between_attempts/P0}")
 
-        print(
-            f"Ratio of expected to sim time: {(minimum_time_between_attempts/P0)/entangle_time_in_seconds}"
-        )
+    print(
+        f"Ratio of expected to sim time: {(minimum_time_between_attempts/P0)/entangle_time_in_seconds}"
+    )
 
     normalized_entangle_time = time_between_attempts / (
         qc_dist / 2 / SPEED_OF_LIGHT_M_PER_S
