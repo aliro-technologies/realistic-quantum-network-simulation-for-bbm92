@@ -6,7 +6,7 @@
     505.04162532576356
   ],
   "secure_key_rate_errors": [
-    16.60123968113756
+    15.303382134328407
   ],
   "raw_key_rates": [
     894.3358630601779
@@ -23,8 +23,8 @@
   "qbers_label": "QBER",
   "raw_key_rates_label": "Raw key rate (bps)",
   "secure_key_rates_label": "Secure key rate (bps)",
-  "x_parameter_name": "detection_resolution",
-  "detection_resolution": [
-    6.9e-10
+  "x_parameter_name": "loss_per_link",
+  "loss_per_link": [
+    12.0
   ]
 }
