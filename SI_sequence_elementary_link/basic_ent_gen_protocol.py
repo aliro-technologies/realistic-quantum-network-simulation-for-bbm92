@@ -1,0 +1,330 @@
+"""
+Copyright © 2025, UChicago Argonne, LLC
+
+All Rights Reserved
+
+Software Name: SeQUeNCe: Simulator of QUantum Network Communication
+
+By: Argonne National Laboratory, Illinois Institute of Technology, and 
+Encore Consulting Services, Inc
+
+OPEN SOURCE LICENSE
+
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, 
+this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, 
+this list of conditions and the following disclaimer in the documentation 
+and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors 
+may be used to endorse or promote products derived from this software without 
+specific prior written permission.
+
+
+*****************************************************************************
+DISCLAIMER
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+OF SUCH DAMAGE.
+*****************************************************************************
+
+
+Code adapted from: https://github.com/sequence-toolbox/SeQUeNCe/blob/master/sequence/entanglement_management/generation/barret_kok.py
+"""
+
+from typing import Any
+
+from sequence.entanglement_management.generation.generation_message import (
+    EntanglementGenerationMessage,
+    GenerationMsgType,
+    valid_trigger_time,
+)
+
+from sequence.resource_management.memory_manager import MemoryInfo
+from sequence.constants import BARRET_KOK
+from sequence.entanglement_management.generation.generation_base import (
+    EntanglementGenerationA,
+    QuantumCircuitMixin,
+)
+
+from sequence.kernel.event import Event
+from sequence.kernel.process import Process
+from sequence.utils import log
+
+import numpy as np
+
+
+@EntanglementGenerationA.register(
+    BARRET_KOK
+)  # Overwrite default Barret-Kok with SimpleEntGenA
+class SimpleEntGenA(EntanglementGenerationA, QuantumCircuitMixin):
+    """Entanglement generation protocol for quantum router.
+
+    The EntanglementGenerationA protocol should be instantiated on a quantum router node.
+    Instances will communicate with each other (and with the B instance on a BSM node) to generate entanglement.
+
+    Attributes:
+        owner (QuantumRouter): node that protocol instance is attached to.
+        name (str): label for protocol instance.
+        middle (str): name of BSM measurement node where emitted photons should be directed.
+        remote_node_name (str): name of distant QuantumRouter node, containing a memory to be entangled with local memory.
+        memory (Memory): quantum memory object to attempt entanglement for.
+    """
+
+    def __init__(
+        self,
+        owner: "Node",
+        name: str,
+        middle: str,
+        other: str,
+        memory: "Memory",
+        **kwargs: Any,
+    ):
+        """Constructor for entanglement generation A class.
+
+        Args:
+            owner (Node): node to attach protocol to.
+            name (str): name of protocol instance.
+            middle (str): name of middle measurement node.
+            other (str): name of other node.
+            memory (Memory): memory to entangle.
+        """
+
+        # raise error if passed kwargs
+        if kwargs:
+            raise ValueError(f"Unexpected keyword arguments: {kwargs}")
+
+        super().__init__(owner, name, middle, other, memory)
+        self.protocol_type = BARRET_KOK  # Overwrite default Barret-Kok
+        self.bsm_res = [-1]
+        self.fidelity: float = memory.raw_fidelity
+        self.refstate = [0.0 + 0j, 0.70710678 + 0j, 0.70710678 + 0j, 0.0 + 0j]
+
+    def update_memory(self) -> bool | None:
+        """Method to handle necessary memory operations.
+
+        Called on both nodes.
+        Will check the state of the memory and protocol.
+
+        Returns:
+            bool: if entanglement generation was successful.
+
+        Side Effects:
+            May change state of attached memory.
+            May update memory state in the attached node's resource manager.
+        """
+
+        if self not in self.owner.protocols:
+            return
+
+        self.ent_round += 1
+
+        if self.ent_round == 1:
+            return True
+
+        elif (
+            self.ent_round > 1
+            and self.bsm_res[0] != -1
+            and len(self.memory.get_bds_state()) > 2
+        ):
+            # entanglement succeeded, then apply correction
+            if self.bsm_res[0] == 0:
+                if not self.primary:
+                    self.owner.timeline.quantum_manager.run_circuit(
+                        self._z_circuit, [self._qstate_key]
+                    )
+
+            pure_state_fidelity = (
+                np.matmul(self.refstate, self.memory.get_bds_state()) ** 2
+            )
+            self.memory.fidelity = np.real(pure_state_fidelity)
+            remote_state = self.owner.timeline.get_entity_by_name(
+                self.remote_memo_id
+            ).get_bds_state()
+            remote_state_fidelity = np.real(np.matmul(self.refstate, remote_state) ** 2)
+
+            if remote_state_fidelity != pure_state_fidelity:
+                raise ValueError(
+                    "Error: Remote state fidelity should equal pure state fidelity."
+                )
+
+            self._entanglement_succeed()
+            return True
+
+        else:
+            self._entanglement_fail()
+            return False
+
+    def emit_event(self) -> None:
+        """Method to set up memory and emit photons.
+
+        Side Effects:
+            May change state of attached memory.
+            May cause attached memory to emit photon.
+        """
+
+        if self.ent_round == 1:
+            self.memory.update_state(self._plus_state)
+            self.memory.excite(self.middle)
+
+    def received_message(self, src: str, msg: EntanglementGenerationMessage) -> None:
+        """Method to receive messages.
+
+        This method receives messages from other entanglement generation protocols.
+        Depending on the message, different actions may be taken by the protocol.
+
+        Args:
+            src (str): name of the source node sending the message.
+            msg (EntanglementGenerationMessage): message received.
+
+        Side Effects:
+            May schedule various internal and hardware events.
+        """
+
+        if src not in [self.middle, self.remote_node_name]:
+            return
+
+        msg_type = msg.msg_type
+
+        log.logger.debug(
+            "{} {} received message from node {} of type {}, round={}".format(
+                self.owner.name, self.name, src, msg.msg_type, self.ent_round
+            )
+        )
+
+        if msg_type is GenerationMsgType.NEGOTIATE:  # primary -> non-primary
+            # configure params
+            other_qc_delay = msg.qc_delay
+            self.qc_delay = self.owner.qchannels[self.middle].delay
+            cc_delay = int(self.owner.cchannels[src].delay)
+
+            # get time for first excite event
+            memory_excite_time = self.memory.next_excite_time
+            min_time = (
+                max(self.owner.timeline.now(), memory_excite_time)
+                + other_qc_delay
+                - self.qc_delay
+                + cc_delay
+            )
+            emit_time = self.owner.schedule_qubit(
+                self.middle, min_time
+            )  # used to send memory
+            self.expected_time = (
+                emit_time + self.qc_delay
+            )  # expected time for middle BSM node to receive the photon
+
+            # schedule emit
+            process = Process(self, "emit_event", [])
+            event = Event(emit_time, process)
+            self.owner.timeline.schedule(event)
+            self.scheduled_events.append(event)
+
+            # send negotiate_ack
+            other_emit_time = emit_time + self.qc_delay - other_qc_delay
+            message = EntanglementGenerationMessage(
+                GenerationMsgType.NEGOTIATE_ACK,
+                self.remote_protocol_name,
+                protocol_type=self.protocol_type,
+                emit_time=other_emit_time,
+            )
+            self.owner.send_message(src, message)
+
+            # schedule start if necessary (current is first round, need second round),
+            # else schedule update_memory (currently second round)
+            future_start_time = (
+                self.expected_time + self.owner.cchannels[self.middle].delay + 10
+            )  # delay is for sending the BSM_RES to end nodes, 10 is a small gap
+
+            process = Process(self, "update_memory", [])
+
+            priority = self.owner.timeline.schedule_counter
+            event = Event(future_start_time, process, priority)
+            self.owner.timeline.schedule(event)
+            self.scheduled_events.append(event)
+
+        elif msg_type is GenerationMsgType.NEGOTIATE_ACK:  # non-primary --> primary
+            # configure params
+            self.expected_time = (
+                msg.emit_time + self.qc_delay
+            )  # expected time for middle BSM node to receive the photon
+
+            if (
+                msg.emit_time < self.owner.timeline.now()
+            ):  # emit time calculated by the non-primary node
+                msg.emit_time = self.owner.timeline.now()
+
+            # schedule emit
+            emit_time = self.owner.schedule_qubit(self.middle, msg.emit_time)
+            assert (
+                emit_time == msg.emit_time
+            ), f"Invalid eg emit times {emit_time} {msg.emit_time} {self.owner.timeline.now()}"
+
+            process = Process(self, "emit_event", [])
+            event = Event(msg.emit_time, process)
+            self.owner.timeline.schedule(event)
+            self.scheduled_events.append(event)
+
+            # schedule start if necessary (current is first round, need second round),
+            # else schedule update_memory (currently second round)
+            future_start_time = (
+                self.expected_time + self.owner.cchannels[self.middle].delay + 10
+            )
+            process = Process(self, "update_memory", [])
+
+            priority = self.owner.timeline.schedule_counter
+            event = Event(future_start_time, process, priority)
+            self.owner.timeline.schedule(event)
+            self.scheduled_events.append(event)
+
+        elif (
+            msg_type is GenerationMsgType.MEAS_RES
+        ):  # from middle BSM to both non-primary and primary
+            detector = msg.detector
+            time = msg.time
+            resolution = msg.resolution
+
+            log.logger.debug(
+                "{} received MEAS_RES={} at time={:,}, expected={:,}, resolution={}, round={}".format(
+                    self.owner.name,
+                    detector,
+                    time,
+                    self.expected_time,
+                    resolution,
+                    self.ent_round,
+                )
+            )
+
+            if valid_trigger_time(time, self.expected_time, resolution):
+                # record result if we don't already have one
+                #  i = self.ent_round - 1
+                if self.bsm_res[0] == -1:
+                    self.bsm_res[
+                        0
+                    ] = detector  # save the measurement results (detector number)
+                else:
+                    self.bsm_res[0] = -1  # BSM measured 1, 1 (both photons kept)
+            else:
+                log.logger.debug(f"{self.owner.name} BSM trigger time not valid")
+
+        else:
+            raise Exception(
+                f"Invalid message {msg_type} received by EG on node {self.owner.name}"
+            )
+
+    def _entanglement_succeed(self):
+        self.memory.entangled_memory["node_id"] = self.remote_node_name
+        self.memory.entangled_memory["memo_id"] = self.remote_memo_id
+        self.update_resource_manager(self.memory, MemoryInfo.ENTANGLED)

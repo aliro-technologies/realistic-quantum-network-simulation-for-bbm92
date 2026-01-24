@@ -8,7 +8,7 @@ Some of the code in this repo requires the `aqnsim` Python package to run. For m
 
 All simulations in this repo can be run in the `aqnsim-dev` conda environment provided by AQNSim. All AQNSim simulations in this repo are compatible with AQNSim v0.12.0 (`aqnsim==0.12.0`).
 
-We have included a yml file in this repo to run the theory and experimental analysis scripts (`run_theory.sh`, `run_exp_analysis.sh`, and `run_make_comparison_plot.sh`) in this repo without having access to AQNSim. First, install [`conda`](https://conda.io/projects/conda/en/latest/index.html).
+We have included a yml file in this repo to run the theory and experimental analysis scripts (`run_theory.sh`, `run_exp_analysis.sh`, `run_make_comparison_plot.sh`, and `run_SI_scripts.sh`) in this repo without having access to AQNSim. First, install [`conda`](https://conda.io/projects/conda/en/latest/index.html).
 
 To create the environment from the yml file, navigate to the root project directory and run the command:
 

@@ -30,19 +30,13 @@ def get_secure_key_rate_error(raw_key_rate, raw_key_rate_error, qber, qber_error
     :param qber: The QBER for BBM-92.
     :param qber_error: The calculated error for the BBM-92 QBER.
     """
-    kappa = np.sqrt((1 / (np.log(2) * (1 - qber))) ** 2 * qber_error**2)
-    gamma = np.sqrt((1 / (np.log(2) * qber)) ** 2 * qber_error**2)
-    beta = -(1 - qber) * np.log2(1 - qber)
-    delta_beta = beta * np.sqrt(
-        (qber_error / (1 - qber)) ** 2 + (kappa / np.log2(1 - qber)) ** 2
-    )
-    alpha = -qber * np.log2(qber)
-    delta_alpha = alpha * np.sqrt(
-        (qber_error / qber) ** 2 + (gamma / np.log2(qber)) ** 2
-    )
-
-    qber_entropy = alpha + beta
-    delta_qber_entropy = np.sqrt(delta_alpha**2 + delta_beta**2)
+    if qber == 1 or qber == 0:
+        # This means there were not enough statistics to determine QBER accurately
+        qber_entropy = float("nan")
+        delta_qber_entropy = 0
+    else:
+        qber_entropy = -qber * np.log2(qber) - (1 - qber) * np.log2(1 - qber)
+        delta_qber_entropy = np.abs(np.log2((1 - qber) / qber)) * qber_error
 
     A = 1 - 2.1 * qber_entropy
     delta_A = 2.1 * delta_qber_entropy

@@ -6,7 +6,7 @@
     505.04162532576356
   ],
   "secure_key_rate_errors": [
-    16.60123968113756
+    15.303382134328407
   ],
   "raw_key_rates": [
     894.3358630601779
@@ -23,8 +23,8 @@
   "qbers_label": "QBER",
   "raw_key_rates_label": "Raw key rate (bps)",
   "secure_key_rates_label": "Secure key rate (bps)",
-  "x_parameter_name": "dark_count_rate",
-  "dark_count_rate": [
-    1150.0
+  "x_parameter_name": "source_pair_rate",
+  "source_pair_rate": [
+    1500000.0
   ]
 }
